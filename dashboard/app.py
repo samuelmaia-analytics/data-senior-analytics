@@ -11,6 +11,16 @@ import streamlit as st
 from config.settings import Settings
 from src.data.sqlite_manager import SQLiteManager
 
+PAGE_OPTIONS = [
+    "Home",
+    "Upload",
+    "Data Preview",
+    "Exploratory Analysis",
+    "Visualizations",
+    "Database",
+    "Settings",
+]
+
 st.set_page_config(
     page_title="Data Senior Analytics",
     page_icon="DA",
@@ -38,6 +48,8 @@ def ensure_session_defaults() -> None:
         st.session_state.data_name = None
     if "data_source" not in st.session_state:
         st.session_state.data_source = None
+    if "selected_page" not in st.session_state:
+        st.session_state.selected_page = "Home"
 
     if st.session_state.data is None:
         demo_df = load_default_demo_data()
@@ -197,10 +209,10 @@ def render_database(db: SQLiteManager) -> None:
         return
 
     table = st.selectbox("Table", tables, key="database_table")
-    count = db.fetch_scalar(f"SELECT COUNT(*) FROM {table}") or 0
+    count = db.fetch_scalar(f"SELECT COUNT(*) FROM [{table}]") or 0
     st.metric("Rows in table", int(count))
 
-    preview = db.sql_to_df(f"SELECT * FROM {table} LIMIT 500")
+    preview = db.sql_to_df(f"SELECT * FROM [{table}] LIMIT 500")
     st.dataframe(preview, use_container_width=True, height=460)
 
 
@@ -223,47 +235,45 @@ def main() -> None:
     db = get_db()
     df = st.session_state.data
 
-    with st.sidebar:
-        st.markdown("## Navigation")
-        page = st.radio(
-            "Go to",
-            [
-                "Home",
-                "Upload",
-                "Data Preview",
-                "Exploratory Analysis",
-                "Visualizations",
-                "Database",
-                "Settings",
-            ],
-            label_visibility="collapsed",
-        )
+    render_header()
+    page = st.radio(
+        "Navigation",
+        PAGE_OPTIONS,
+        horizontal=True,
+        key="selected_page",
+        label_visibility="collapsed",
+    )
 
-        st.markdown("---")
+    with st.sidebar:
+        st.markdown("## Active Context")
+        st.caption(f"Page: {page}")
         if df is not None and not df.empty:
-            st.markdown("### Active Dataset")
-            st.caption(st.session_state.data_name)
+            st.caption(f"Dataset: {st.session_state.data_name}")
             st.caption(f"Rows: {df.shape[0]:,}")
             st.caption(f"Cols: {df.shape[1]}")
             if st.session_state.data_source == "sample_auto":
                 st.info("Default demo dataset loaded.")
+        if st.button("Reset session", use_container_width=True):
+            for key in ("data", "data_name", "data_source"):
+                if key in st.session_state:
+                    del st.session_state[key]
+            st.rerun()
 
-    render_header()
+    page_handlers = {
+        "Home": lambda: render_home(df, db),
+        "Upload": lambda: render_upload(db),
+        "Data Preview": lambda: render_data_preview(df),
+        "Exploratory Analysis": lambda: render_eda(df),
+        "Visualizations": lambda: render_charts(df),
+        "Database": lambda: render_database(db),
+        "Settings": lambda: render_settings(df),
+    }
 
-    if page == "Home":
-        render_home(df, db)
-    elif page == "Upload":
-        render_upload(db)
-    elif page == "Data Preview":
-        render_data_preview(df)
-    elif page == "Exploratory Analysis":
-        render_eda(df)
-    elif page == "Visualizations":
-        render_charts(df)
-    elif page == "Database":
-        render_database(db)
-    elif page == "Settings":
-        render_settings(df)
+    try:
+        page_handlers[page]()
+    except Exception as exc:  # noqa: BLE001
+        st.error("This page failed to render. The app remains available.")
+        st.exception(exc)
 
 
 if __name__ == "__main__":
