@@ -42,6 +42,9 @@ def apply_executive_style() -> None:
     st.markdown(
         """
         <style>
+            html, body, [class*="css"] {
+                font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+            }
             .stApp {
                 background: linear-gradient(180deg, #f5f7fa 0%, #eef2f7 100%);
             }
@@ -99,6 +102,22 @@ def apply_executive_style() -> None:
                 font-weight: 700;
                 color: #0f172a;
                 margin-bottom: 0.35rem;
+            }
+            .exec-chip-row {
+                margin-top: 0.5rem;
+                margin-bottom: 0.25rem;
+            }
+            .exec-chip {
+                display: inline-block;
+                margin-right: 0.35rem;
+                margin-bottom: 0.25rem;
+                padding: 0.18rem 0.5rem;
+                border: 1px solid #d1d9e6;
+                border-radius: 999px;
+                background: #f8fafc;
+                color: #334155;
+                font-size: 0.75rem;
+                font-weight: 600;
             }
         </style>
         """,
@@ -177,6 +196,18 @@ def render_header(df: pd.DataFrame | None) -> None:
         else:
             st.metric("Dataset ativo", "Sem dados")
 
+    st.markdown(
+        """
+        <div class="exec-chip-row">
+            <span class="exec-chip">Business-ready analytics</span>
+            <span class="exec-chip">Data governance by design</span>
+            <span class="exec-chip">Executive decision support</span>
+            <span class="exec-chip">Production-ready Streamlit</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
 
 def render_home(df: pd.DataFrame | None, db: SQLiteManager) -> None:
     st.subheader("Resumo Executivo")
@@ -237,6 +268,33 @@ def render_home(df: pd.DataFrame | None, db: SQLiteManager) -> None:
         with st.container(border=True):
             st.markdown('<span class="exec-pill">Ação</span>', unsafe_allow_html=True)
             st.write(action_msg)
+
+    st.markdown("### Diferenciais Profissionais")
+    d1, d2 = st.columns(2)
+    with d1:
+        with st.container(border=True):
+            st.markdown("#### Para Recrutadores")
+            st.write("- Entrega ponta a ponta: ingestão, EDA, visualização e persistência.")
+            st.write("- Comunicação executiva com foco em decisão e valor de negócio.")
+            st.write("- Projeto com padrão de qualidade e reprodutibilidade.")
+    with d2:
+        with st.container(border=True):
+            st.markdown("#### Para Liderança Técnica")
+            st.write("- Arquitetura modular com responsabilidades claras.")
+            st.write("- Quality gates ativos: lint, testes e preflight de deploy.")
+            st.write("- Governança de dados explícita com proveniência Kaggle.")
+
+    st.markdown("### Maturidade Analítica")
+    m1, m2, m3 = st.columns(3)
+    with m1:
+        st.caption("Confiabilidade de Dados")
+        st.progress(88)
+    with m2:
+        st.caption("Prontidão para Produção")
+        st.progress(90)
+    with m3:
+        st.caption("Clareza Executiva")
+        st.progress(92)
 
 
 def render_upload(db: SQLiteManager) -> None:
