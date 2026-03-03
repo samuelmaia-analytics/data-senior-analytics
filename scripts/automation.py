@@ -66,7 +66,6 @@ class TaskAutomation:
         """Remove arquivos antigos"""
         logger.info("🧹 Iniciando limpeza de arquivos antigos")
 
-        import shutil
         from datetime import timedelta
 
         # Remove backups com mais de 30 dias

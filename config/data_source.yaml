@@ -1,0 +1,18 @@
+﻿project_dataset:
+  provenance_status: approved
+  source_type: kaggle
+  source_platform: Kaggle
+  dataset_name: "Credit Risk Benchmark Dataset"
+  dataset_url: "https://www.kaggle.com/datasets?datasetId=7083324"
+  owner: "not_available_in_notebook_metadata"
+  version_or_snapshot_date: "2025-05-01"
+  license: "not_available_in_notebook_metadata"
+  retrieval_method: "kaggle_notebook_datasource"
+  retrieval_date: "2026-03-03"
+  local_storage_path: "data/raw/"
+  commit_data_files: false
+  data_dictionary_url: "https://www.kaggle.com/datasets?datasetId=7083324"
+  kaggle_dataset_id: 7083324
+  kaggle_source_id: 11324518
+  source_notebook_path: "data/raw/classifica-o-de-inadimpl-ncia.ipynb"
+  notes: "Metadata extracted from notebook metadata.kaggle.dataSources; owner/license were not present in notebook JSON."

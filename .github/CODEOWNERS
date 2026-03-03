@@ -1,0 +1,7 @@
+﻿# Default code ownership
+* @samuelmaia-data-analyst
+
+# Critical governance and deployment files
+config/data_source.yaml @samuelmaia-data-analyst
+docs/DATA_PROVENANCE.md @samuelmaia-data-analyst
+.github/workflows/ci.yml @samuelmaia-data-analyst

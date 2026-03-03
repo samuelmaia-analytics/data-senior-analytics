@@ -4,7 +4,6 @@ Configurações do projeto Data Senior Analytics
 """
 
 from pathlib import Path
-import os
 
 
 class Settings:

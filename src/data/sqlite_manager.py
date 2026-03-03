@@ -1,12 +1,13 @@
-# src/data/sqlite_manager.py
-"""
+﻿"""
 Gerenciador de banco SQLite
 """
 
-import sqlite3
-import pandas as pd
-from pathlib import Path
 import logging
+import sqlite3
+from typing import Any
+
+import pandas as pd
+
 from config.settings import Settings
 
 # Configurar logger
@@ -32,8 +33,8 @@ class SQLiteManager:
         try:
             self.conn = sqlite3.connect(str(self.db_path))
             return self.conn
-        except Exception as e:
-            logger.error(f"Erro na conexão: {e}")
+        except Exception as exc:
+            logger.error(f"Erro na conexão: {exc}")
             return None
 
     def disconnect(self):
@@ -42,7 +43,7 @@ class SQLiteManager:
             self.conn.close()
             self.conn = None
 
-    def df_to_sql(self, df, table_name, if_exists='replace'):
+    def df_to_sql(self, df, table_name, if_exists="replace"):
         """
         Salva DataFrame em tabela SQL
 
@@ -62,8 +63,8 @@ class SQLiteManager:
             df.to_sql(table_name, conn, if_exists=if_exists, index=False)
             logger.info(f"DataFrame salvo em '{table_name}' ({len(df)} linhas)")
             return True
-        except Exception as e:
-            logger.error(f"Erro ao salvar: {e}")
+        except Exception as exc:
+            logger.error(f"Erro ao salvar: {exc}")
             return False
         finally:
             self.disconnect()
@@ -86,8 +87,8 @@ class SQLiteManager:
             df = pd.read_sql_query(query, conn)
             logger.debug(f"Query retornou {len(df)} linhas")
             return df
-        except Exception as e:
-            logger.error(f"Erro na query: {e}")
+        except Exception as exc:
+            logger.error(f"Erro na query: {exc}")
             return pd.DataFrame()
         finally:
             self.disconnect()
@@ -104,8 +105,8 @@ class SQLiteManager:
             cursor.execute(query)
             tables = [row[0] for row in cursor.fetchall()]
             return tables
-        except Exception as e:
-            logger.error(f"Erro ao listar tabelas: {e}")
+        except Exception as exc:
+            logger.error(f"Erro ao listar tabelas: {exc}")
             return []
         finally:
             self.disconnect()
@@ -134,11 +135,58 @@ class SQLiteManager:
 
             conn.commit()
             return cursor.rowcount
-        except Exception as e:
-            logger.error(f"Erro na query: {e}")
+        except Exception as exc:
+            logger.error(f"Erro na query: {exc}")
             return None
         finally:
             self.disconnect()
+
+    def fetch_all(self, query: str, params: tuple[Any, ...] | None = None) -> list[tuple[Any, ...]]:
+        """
+        Executa query SQL e retorna todas as linhas.
+
+        Args:
+            query: String SQL
+            params: Parâmetros para query parametrizada
+
+        Returns:
+            Lista de tuplas com resultados (vazia em caso de erro)
+        """
+        conn = self.connect()
+        if not conn:
+            return []
+
+        try:
+            cursor = conn.cursor()
+            if params:
+                cursor.execute(query, params)
+            else:
+                cursor.execute(query)
+            return cursor.fetchall()
+        except Exception as exc:
+            logger.error(f"Erro na query de leitura: {exc}")
+            return []
+        finally:
+            self.disconnect()
+
+    def fetch_scalar(self, query: str, params: tuple[Any, ...] | None = None) -> Any:
+        """
+        Executa query SQL e retorna o primeiro valor da primeira linha.
+
+        Args:
+            query: String SQL
+            params: Parâmetros para query parametrizada
+
+        Returns:
+            Valor escalar ou None se não houver resultado/erro
+        """
+        rows = self.fetch_all(query, params=params)
+        if not rows:
+            return None
+        first_row = rows[0]
+        if not first_row:
+            return None
+        return first_row[0]
 
     def backup_database(self):
         """
@@ -160,6 +208,7 @@ class SQLiteManager:
             shutil.copy2(self.db_path, backup_path)
             logger.info(f"Backup criado: {backup_path}")
             return backup_path
-        except Exception as e:
-            logger.error(f"Erro no backup: {e}")
+        except Exception as exc:
+            logger.error(f"Erro no backup: {exc}")
             return None
+

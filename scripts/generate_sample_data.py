@@ -13,7 +13,6 @@ import logging
 sys.path.append(str(Path(__file__).parent.parent))
 
 from src.data.sqlite_manager import SQLiteManager
-from src.data.file_extractor import FileExtractor
 from config.settings import Settings
 
 # Configurar logging
@@ -139,9 +138,9 @@ def main():
     logger.info("\n📋 Tabelas no SQLite:")
     tables = db.list_tables()
     for table in tables:
-        count = db.execute_query(f"SELECT COUNT(*) FROM {table}")
-        if count:
-            logger.info(f"   - {table}: {count[0][0]:,} registros")
+        count = db.fetch_scalar(f"SELECT COUNT(*) FROM {table}")
+        if count is not None:
+            logger.info(f"   - {table}: {int(count):,} registros")
 
     logger.info("\n" + "=" * 50)
     logger.info("✅ Dados gerados com sucesso!")
@@ -150,3 +149,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
