@@ -18,72 +18,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.markdown(
-    """
-<style>
-    @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
-
-    :root {
-        --bg: #f5f7fb;
-        --surface: #ffffff;
-        --text: #101828;
-        --muted: #475467;
-        --border: #d0d5dd;
-        --brand: #0f172a;
-        --accent: #c91c24;
-    }
-
-    .stApp {
-        font-family: "Manrope", sans-serif;
-        background: radial-gradient(circle at 0% 0%, #ffffff 0%, var(--bg) 55%);
-        color: var(--text);
-    }
-
-    .main .block-container {
-        max-width: 1240px;
-        padding-top: 1.1rem;
-        padding-bottom: 2.2rem;
-    }
-
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
-    }
-
-    [data-testid="stSidebar"] * {
-        color: #f9fafb !important;
-    }
-
-    .app-title {
-        margin: 0;
-        font-size: clamp(2rem, 3vw, 2.7rem);
-        font-weight: 800;
-        color: var(--brand);
-        letter-spacing: -0.02em;
-    }
-
-    .app-subtitle {
-        margin: 0.2rem 0 1rem 0;
-        color: var(--muted);
-        font-size: 0.98rem;
-    }
-
-    .panel {
-        border: 1px solid var(--border);
-        background: var(--surface);
-        border-radius: 12px;
-        padding: 1rem 1rem 0.4rem 1rem;
-        box-shadow: 0 6px 18px rgba(16, 24, 40, 0.06);
-    }
-
-    .stDataFrame, [data-testid="stMetric"] {
-        border-radius: 10px;
-    }
-</style>
-""",
-    unsafe_allow_html=True,
-)
-
-
 @st.cache_resource
 def get_db() -> SQLiteManager:
     return SQLiteManager()
@@ -114,11 +48,8 @@ def ensure_session_defaults() -> None:
 
 
 def render_header() -> None:
-    st.markdown('<h1 class="app-title">Data Senior Analytics</h1>', unsafe_allow_html=True)
-    st.markdown(
-        '<p class="app-subtitle">Senior-level analytics dashboard for business decision support</p>',
-        unsafe_allow_html=True,
-    )
+    st.title("Data Senior Analytics")
+    st.caption("Senior-level analytics dashboard for business decision support")
 
 
 def render_home(df: pd.DataFrame | None, db: SQLiteManager) -> None:
@@ -136,13 +67,10 @@ def render_home(df: pd.DataFrame | None, db: SQLiteManager) -> None:
 
     left, right = st.columns(2)
     with left:
-        st.markdown('<div class="panel">', unsafe_allow_html=True)
         st.markdown("### Business Goal")
         st.write("Transform raw datasets into validated analytical insights for faster decisions.")
-        st.markdown("</div>", unsafe_allow_html=True)
 
     with right:
-        st.markdown('<div class="panel">', unsafe_allow_html=True)
         st.markdown("### Current Data Status")
         if df is not None and not df.empty:
             st.write(f"Dataset: **{st.session_state.data_name}**")
@@ -150,7 +78,6 @@ def render_home(df: pd.DataFrame | None, db: SQLiteManager) -> None:
             st.write(f"Columns: **{df.shape[1]}**")
         else:
             st.write("No dataset loaded yet.")
-        st.markdown("</div>", unsafe_allow_html=True)
 
 
 def render_upload(db: SQLiteManager) -> None:
@@ -171,10 +98,14 @@ def render_upload(db: SQLiteManager) -> None:
     st.session_state.data_source = "upload"
 
     st.success(f"Loaded: {uploaded.name}")
-    st.dataframe(df.head(50), use_container_width=True)
+    st.dataframe(df.head(50), use_container_width=True, height=340)
 
-    table_name = st.text_input("SQLite table name", value=uploaded.name.replace(".", "_"))
-    if st.button("Save to SQLite"):
+    table_name = st.text_input(
+        "SQLite table name",
+        value=uploaded.name.replace(".", "_"),
+        key="upload_table_name",
+    )
+    if st.button("Save to SQLite", key="save_sqlite_button"):
         ok = db.df_to_sql(df, table_name)
         if ok:
             st.success(f"Saved to table: {table_name}")
@@ -188,7 +119,7 @@ def render_data_preview(df: pd.DataFrame | None) -> None:
         st.warning("No data available.")
         return
 
-    st.dataframe(df.head(200), use_container_width=True)
+    st.dataframe(df.head(200), use_container_width=True, height=460)
 
     info = pd.DataFrame(
         {
@@ -199,7 +130,7 @@ def render_data_preview(df: pd.DataFrame | None) -> None:
         }
     )
     st.markdown("### Column Profile")
-    st.dataframe(info, use_container_width=True)
+    st.dataframe(info, use_container_width=True, height=320)
 
 
 def render_eda(df: pd.DataFrame | None) -> None:
@@ -223,7 +154,7 @@ def render_eda(df: pd.DataFrame | None) -> None:
         return
 
     st.markdown("### Descriptive Statistics")
-    st.dataframe(numeric.describe().T, use_container_width=True)
+    st.dataframe(numeric.describe().T, use_container_width=True, height=360)
 
     if numeric.shape[1] > 1:
         corr = numeric.corr(numeric_only=True)
@@ -241,13 +172,18 @@ def render_charts(df: pd.DataFrame | None) -> None:
     cat_cols = df.select_dtypes(include=["object", "category"]).columns.tolist()
 
     if numeric_cols:
-        col = st.selectbox("Numeric variable", numeric_cols)
+        col = st.selectbox("Numeric variable", numeric_cols, key="chart_numeric_variable")
         fig = px.histogram(df, x=col, nbins=30, title=f"Distribution: {col}")
         st.plotly_chart(fig, use_container_width=True)
 
     if cat_cols and numeric_cols:
-        cat = st.selectbox("Category", cat_cols)
-        val = st.selectbox("Metric", numeric_cols, index=min(1, len(numeric_cols) - 1))
+        cat = st.selectbox("Category", cat_cols, key="chart_category")
+        val = st.selectbox(
+            "Metric",
+            numeric_cols,
+            index=min(1, len(numeric_cols) - 1),
+            key="chart_metric",
+        )
         grouped = df.groupby(cat, dropna=False)[val].mean().reset_index().sort_values(val, ascending=False)
         fig = px.bar(grouped.head(15), x=cat, y=val, title=f"Average {val} by {cat}")
         st.plotly_chart(fig, use_container_width=True)
@@ -260,12 +196,12 @@ def render_database(db: SQLiteManager) -> None:
         st.info("No tables found in SQLite yet.")
         return
 
-    table = st.selectbox("Table", tables)
+    table = st.selectbox("Table", tables, key="database_table")
     count = db.fetch_scalar(f"SELECT COUNT(*) FROM {table}") or 0
     st.metric("Rows in table", int(count))
 
     preview = db.sql_to_df(f"SELECT * FROM {table} LIMIT 500")
-    st.dataframe(preview, use_container_width=True)
+    st.dataframe(preview, use_container_width=True, height=460)
 
 
 def render_settings(df: pd.DataFrame | None) -> None:
