@@ -70,14 +70,6 @@ def apply_executive_style() -> None:
                 color: #475569;
                 font-size: 0.95rem;
             }
-            .section-card {
-                background: #ffffff;
-                border: 1px solid #d8dee8;
-                border-radius: 12px;
-                padding: 0.8rem 1rem 0.2rem 1rem;
-                box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
-                min-height: 170px;
-            }
         </style>
         """,
         unsafe_allow_html=True,
@@ -171,24 +163,22 @@ def render_home(df: pd.DataFrame | None, db: SQLiteManager) -> None:
 
     left, right = st.columns(2)
     with left:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
-        st.markdown("### Objetivo")
-        st.write("Transformar dados tabulares em insights acionaveis para decisao rapida e segura.")
-        st.markdown("### Valor")
-        st.write("Fluxo analitico ponta a ponta com padrao senior e foco em negocio.")
-        st.markdown("</div>", unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown("### Objetivo")
+            st.write("Transformar dados tabulares em insights acionaveis para decisao rapida e segura.")
+            st.markdown("### Valor")
+            st.write("Fluxo analitico ponta a ponta com padrao senior e foco em negocio.")
 
     with right:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
-        st.markdown("### Status dos Dados")
-        if df is not None and not df.empty:
-            st.write(f"Dataset: **{st.session_state.data_name}**")
-            st.write(f"Linhas: **{df.shape[0]:,}**")
-            st.write(f"Colunas: **{df.shape[1]}**")
-            st.write(f"Fonte: **{st.session_state.data_source}**")
-        else:
-            st.info("Nenhum dataset carregado no momento.")
-        st.markdown("</div>", unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown("### Status dos Dados")
+            if df is not None and not df.empty:
+                st.write(f"Dataset: **{st.session_state.data_name}**")
+                st.write(f"Linhas: **{df.shape[0]:,}**")
+                st.write(f"Colunas: **{df.shape[1]}**")
+                st.write(f"Fonte: **{st.session_state.data_source}**")
+            else:
+                st.info("Nenhum dataset carregado no momento.")
 
 
 def render_upload(db: SQLiteManager) -> None:
