@@ -74,6 +74,12 @@ st.markdown("""
             radial-gradient(circle at 20% 0%, #ffffff 0%, #f7f9fc 35%, #eef2f7 100%);
     }
 
+    .stMarkdown p, .stMarkdown li {
+        font-size: 0.98rem;
+        line-height: 1.55;
+        color: var(--text-900);
+    }
+
     .main .block-container {
         padding-top: 1.2rem;
         padding-bottom: 2rem;
@@ -195,6 +201,10 @@ st.markdown("""
     .stDataFrame,
     [data-testid="stMetric"] {
         border-radius: 12px;
+    }
+
+    .metric-card:empty, .info-box:empty, .upload-box:empty, .success-box:empty {
+        display: none !important;
     }
 
     .stButton > button,
