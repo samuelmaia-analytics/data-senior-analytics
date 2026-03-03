@@ -110,7 +110,8 @@ def render_upload(db: SQLiteManager) -> None:
     st.session_state.data_source = "upload"
 
     st.success(f"Loaded: {uploaded.name}")
-    st.dataframe(df.head(50), use_container_width=True, height=340)
+    st.caption("Preview (first 50 rows)")
+    st.table(df.head(50))
 
     table_name = st.text_input(
         "SQLite table name",
@@ -131,7 +132,8 @@ def render_data_preview(df: pd.DataFrame | None) -> None:
         st.warning("No data available.")
         return
 
-    st.dataframe(df.head(200), use_container_width=True, height=460)
+    st.caption("Preview (first 200 rows)")
+    st.table(df.head(200))
 
     info = pd.DataFrame(
         {
@@ -142,7 +144,7 @@ def render_data_preview(df: pd.DataFrame | None) -> None:
         }
     )
     st.markdown("### Column Profile")
-    st.dataframe(info, use_container_width=True, height=320)
+    st.table(info)
 
 
 def render_eda(df: pd.DataFrame | None) -> None:
@@ -166,7 +168,7 @@ def render_eda(df: pd.DataFrame | None) -> None:
         return
 
     st.markdown("### Descriptive Statistics")
-    st.dataframe(numeric.describe().T, use_container_width=True, height=360)
+    st.table(numeric.describe().T)
 
     if numeric.shape[1] > 1:
         corr = numeric.corr(numeric_only=True)
@@ -213,7 +215,8 @@ def render_database(db: SQLiteManager) -> None:
     st.metric("Rows in table", int(count))
 
     preview = db.sql_to_df(f"SELECT * FROM [{table}] LIMIT 500")
-    st.dataframe(preview, use_container_width=True, height=460)
+    st.caption("Table preview (up to 500 rows)")
+    st.table(preview)
 
 
 def render_settings(df: pd.DataFrame | None) -> None:
