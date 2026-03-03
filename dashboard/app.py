@@ -3,15 +3,22 @@
 from __future__ import annotations
 
 import os
+import sys
 import subprocess
 from datetime import datetime
+from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from config.settings import Settings
-from src.data.sqlite_manager import SQLiteManager
+# Ensure project root is importable when Streamlit runs from dashboard/app.py.
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from config.settings import Settings  # noqa: E402
+from src.data.sqlite_manager import SQLiteManager  # noqa: E402
 
 PAGE_OPTIONS = [
     "Home",
