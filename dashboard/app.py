@@ -273,6 +273,22 @@ def init_db():
 
 db = init_db()
 
+@st.cache_data
+def load_default_demo_data() -> pd.DataFrame:
+    """Carrega dataset demo padr?o para evitar telas vazias no primeiro acesso."""
+    demo_path = Settings.SAMPLE_DATA_DIR / "default_demo.csv"
+    if not demo_path.exists():
+        return pd.DataFrame()
+    return pd.read_csv(demo_path)
+
+
+if st.session_state.data is None:
+    demo_df = load_default_demo_data()
+    if not demo_df.empty:
+        st.session_state.data = demo_df
+        st.session_state.data_name = "default_demo.csv"
+        st.session_state.data_source = "sample_auto"
+
 # Sidebar
 with st.sidebar:
     # Logo em texto (sem imagens externas)

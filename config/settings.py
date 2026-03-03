@@ -14,6 +14,7 @@ class Settings:
 
     # Diretórios de dados
     DATA_DIR = ROOT_DIR / "data"
+    SAMPLE_DATA_DIR = DATA_DIR / "sample"
     RAW_DATA_DIR = DATA_DIR / "raw"
     PROCESSED_DATA_DIR = DATA_DIR / "processed"
     EXTERNAL_DATA_DIR = DATA_DIR / "external"
@@ -31,6 +32,7 @@ class Settings:
     def create_directories(cls):
         """Cria todos os diretórios necessários se não existirem"""
         directories = [
+            cls.SAMPLE_DATA_DIR,
             cls.RAW_DATA_DIR,
             cls.PROCESSED_DATA_DIR,
             cls.EXTERNAL_DATA_DIR,

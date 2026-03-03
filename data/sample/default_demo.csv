@@ -1,0 +1,13 @@
+﻿data,produto,categoria,regiao,quantidade,preco_unitario,desconto,cliente_id,valor_total
+2025-01-03,Notebook,Eletronicos,Sudeste,3,4200,10,1001,11340
+2025-01-04,Mouse,Perifericos,Sul,15,120,0,1002,1800
+2025-01-05,Teclado,Perifericos,Nordeste,8,250,5,1003,1900
+2025-01-06,Monitor,Eletronicos,Sudeste,4,1600,8,1004,5888
+2025-01-07,Cadeira,Moveis,Centro-Oeste,2,1300,0,1005,2600
+2025-01-08,Notebook,Eletronicos,Norte,1,3900,12,1006,3432
+2025-01-09,Mouse,Perifericos,Sudeste,20,110,0,1007,2200
+2025-01-10,Monitor,Eletronicos,Sul,3,1700,7,1008,4743
+2025-01-11,Cadeira,Moveis,Nordeste,5,1250,5,1009,5937.5
+2025-01-12,Teclado,Perifericos,Sudeste,10,230,0,1010,2300
+2025-01-13,Notebook,Eletronicos,Sudeste,2,4500,15,1011,7650
+2025-01-14,Monitor,Eletronicos,Centro-Oeste,1,1800,0,1012,1800
