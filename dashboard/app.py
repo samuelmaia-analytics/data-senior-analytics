@@ -1,410 +1,333 @@
-"""
-Dashboard Interativo - Data Senior Analytics
-Autor: Samuel Maia
-Versão: COMPLETA E CORRIGIDA - Todas as páginas funcionando
-"""
+﻿"""Streamlit app rebuilt with a clean executive layout and stable data flow."""
 
-import streamlit as st
-import pandas as pd
-import numpy as np
-import plotly.express as px
-import plotly.graph_objects as go
-from pathlib import Path
-import sys
+from __future__ import annotations
+
 from datetime import datetime
 
-# Adiciona o diretório raiz ao path
-sys.path.append(str(Path(__file__).parent.parent))
+import pandas as pd
+import plotly.express as px
+import streamlit as st
 
-from src.data.sqlite_manager import SQLiteManager
 from config.settings import Settings
-from dashboard.pages.home import render_home_page
-from dashboard.pages.upload import render_upload_page
-from dashboard.pages.data_view import render_data_view_page
-from dashboard.pages.exploratory import render_exploratory_page
-from dashboard.pages.visualizations import render_visualizations_page
-from dashboard.pages.advanced_stats import render_advanced_stats_page
-from dashboard.pages.time_series import render_time_series_page
-from dashboard.pages.correlations import render_correlations_page
-from dashboard.pages.reports import render_reports_page
-from dashboard.pages.database import render_database_page
-from dashboard.pages.settings_page import render_settings_page
-from dashboard.utils.analytics import detect_column_types, get_basic_stats, interpret_correlation
+from src.data.sqlite_manager import SQLiteManager
 
-# Tentar importar scipy (opcional)
-try:
-    from scipy import stats
-
-    SCIPY_AVAILABLE = True
-except ImportError:
-    SCIPY_AVAILABLE = False
-    stats = None
-
-# Configuração da página (DEVE SER O PRIMEIRO COMANDO)
 st.set_page_config(
-    page_title="Data Senior Analytics - Samuel Maia",
-    page_icon="📊",
+    page_title="Data Senior Analytics",
+    page_icon="DA",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
-# CSS personalizado
-st.markdown("""
+st.markdown(
+    """
 <style>
-    @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
+    @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
 
     :root {
-        --brand-900: #0f172a;
-        --brand-700: #1e293b;
-        --brand-500: #334155;
-        --accent-600: #d62828;
-        --accent-500: #e63946;
-        --accent-100: #fdecec;
-        --surface-100: #f8fafc;
-        --surface-200: #eef2f7;
-        --border-200: #dbe3ee;
-        --text-900: #111827;
-        --text-600: #4b5563;
+        --bg: #f5f7fb;
+        --surface: #ffffff;
+        --text: #101828;
+        --muted: #475467;
+        --border: #d0d5dd;
+        --brand: #0f172a;
+        --accent: #c91c24;
     }
 
     .stApp {
         font-family: "Manrope", sans-serif;
-        color: var(--text-900);
-        background:
-            radial-gradient(circle at 20% 0%, #ffffff 0%, #f7f9fc 35%, #eef2f7 100%);
-    }
-
-    .stMarkdown p, .stMarkdown li {
-        font-size: 0.98rem;
-        line-height: 1.55;
-        color: var(--text-900);
+        background: radial-gradient(circle at 0% 0%, #ffffff 0%, var(--bg) 55%);
+        color: var(--text);
     }
 
     .main .block-container {
-        padding-top: 1.2rem;
-        padding-bottom: 2rem;
-        max-width: 1280px;
+        max-width: 1240px;
+        padding-top: 1.1rem;
+        padding-bottom: 2.2rem;
     }
 
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0f172a 0%, #111827 45%, #1f2937 100%);
-        border-right: 1px solid rgba(255, 255, 255, 0.08);
+        background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
     }
 
     [data-testid="stSidebar"] * {
-        color: #f1f5f9 !important;
+        color: #f9fafb !important;
     }
 
-    .main-header {
-        font-family: "Manrope", sans-serif;
-        font-size: clamp(2.0rem, 3.4vw, 3.1rem);
-        color: var(--brand-900);
-        text-align: left;
-        margin: 0 0 0.2rem 0;
+    .app-title {
+        margin: 0;
+        font-size: clamp(2rem, 3vw, 2.7rem);
         font-weight: 800;
-        letter-spacing: -0.03em;
+        color: var(--brand);
+        letter-spacing: -0.02em;
     }
 
-    .sub-header {
-        font-size: 1.02rem;
-        color: var(--text-600);
-        text-align: left;
-        margin-bottom: 1.2rem;
-        font-weight: 500;
+    .app-subtitle {
+        margin: 0.2rem 0 1rem 0;
+        color: var(--muted);
+        font-size: 0.98rem;
     }
 
-    .metric-card {
-        background: linear-gradient(160deg, #ffffff 0%, #f8fafc 65%, #f2f6fb 100%);
-        border: 1px solid var(--border-200);
-        padding: 1rem;
-        border-radius: 16px;
-        text-align: center;
-        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-    }
-
-    .metric-card:hover {
-        transform: translateY(-3px);
-        border-color: #c9d5e5;
-        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
-    }
-
-    .upload-box {
-        border: 2px dashed #b8c4d6;
-        padding: 2rem;
-        border-radius: 16px;
-        text-align: center;
-        background: linear-gradient(145deg, #ffffff 0%, #f6f9fc 100%);
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .upload-box:hover {
-        border-color: var(--accent-500);
-        box-shadow: 0 8px 30px rgba(214, 40, 40, 0.12);
-    }
-
-    .info-box,
-    .warning-box,
-    .success-box,
-    .correlation-card,
-    .chart-container {
-        border-radius: 14px;
-        border: 1px solid var(--border-200);
-        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-    }
-
-    .info-box {
-        background: #f5f9ff;
-        border-left: 5px solid #3b82f6;
-        padding: 1rem;
-        margin: 1rem 0;
-    }
-
-    .warning-box {
-        background: #fff8f1;
-        border-left: 5px solid #f59e0b;
-        padding: 1rem;
-        margin: 1rem 0;
-    }
-
-    .success-box {
-        background: #f0fdf4;
-        border-left: 5px solid #22c55e;
-        padding: 1rem;
-        margin: 1rem 0;
-    }
-
-    .chart-container {
-        background: #ffffff;
-        padding: 1rem;
-        margin: 1rem 0;
-    }
-
-    .correlation-card {
-        background: #ffffff;
-        border-left: 5px solid var(--accent-500);
-        padding: 1rem;
-        margin: 0.5rem 0;
-    }
-
-    .sidebar-header {
-        text-align: center;
-        padding: 1.2rem;
-        background: linear-gradient(160deg, #ef4444 0%, #dc2626 60%, #b91c1c 100%);
-        border-radius: 14px;
-        margin-bottom: 1.2rem;
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.28);
-        box-shadow: 0 14px 26px rgba(0, 0, 0, 0.22);
-    }
-
-    .stDataFrame,
-    [data-testid="stMetric"] {
+    .panel {
+        border: 1px solid var(--border);
+        background: var(--surface);
         border-radius: 12px;
+        padding: 1rem 1rem 0.4rem 1rem;
+        box-shadow: 0 6px 18px rgba(16, 24, 40, 0.06);
     }
 
-    [data-testid="stDataFrame"] [role="gridcell"],
-    [data-testid="stDataFrame"] [role="columnheader"],
-    [data-testid="stDataFrame"] [role="rowheader"] {
-        color: #111827 !important;
-        background-color: #ffffff !important;
-        opacity: 1 !important;
-    }
-
-    .metric-card:empty, .info-box:empty, .upload-box:empty, .success-box:empty {
-        display: none !important;
-    }
-
-    .stButton > button,
-    .stDownloadButton > button {
+    .stDataFrame, [data-testid="stMetric"] {
         border-radius: 10px;
-        border: 1px solid #c7d2e3;
-        background: #ffffff;
-        font-weight: 600;
-    }
-
-    .stButton > button:hover,
-    .stDownloadButton > button:hover {
-        border-color: var(--accent-500);
-        color: var(--accent-600);
-    }
-
-    @media (max-width: 960px) {
-        .main .block-container {
-            padding-top: 0.8rem;
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-
-        .main-header,
-        .sub-header {
-            text-align: left;
-        }
-
-        .upload-box {
-            padding: 1.2rem;
-        }
     }
 </style>
-""", unsafe_allow_html=True)
-
-# Título
-st.markdown('<h1 class="main-header">📊 Data Senior Analytics</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">Samuel Maia - Analista de Dados Sênior | Python 3.14 | Streamlit 1.41</p>',
-            unsafe_allow_html=True)
-st.markdown("---")
-
-# Inicializa session state para armazenar dados
-if 'data' not in st.session_state:
-    st.session_state.data = None
-if 'data_name' not in st.session_state:
-    st.session_state.data_name = None
-if 'data_source' not in st.session_state:
-    st.session_state.data_source = None
-if 'analysis_history' not in st.session_state:
-    st.session_state.analysis_history = []
-
-
-# Inicializa conexão com banco
-@st.cache_resource
-def init_db():
-    return SQLiteManager()
-
-
-db = init_db()
-
-@st.cache_data
-def load_default_demo_data() -> pd.DataFrame:
-    """Carrega dataset demo padr?o para evitar telas vazias no primeiro acesso."""
-    demo_path = Settings.SAMPLE_DATA_DIR / "default_demo.csv"
-    if not demo_path.exists():
-        return pd.DataFrame()
-    return pd.read_csv(demo_path)
-
-
-if st.session_state.data is None:
-    demo_df = load_default_demo_data()
-    if not demo_df.empty:
-        st.session_state.data = demo_df
-        st.session_state.data_name = "default_demo.csv"
-        st.session_state.data_source = "sample_auto"
-
-# Sidebar
-with st.sidebar:
-    # Logo em texto (sem imagens externas)
-    st.markdown("""
-    <div class='sidebar-header'>
-        <h1 style='margin:0; font-size:3rem;'>📊📈</h1>
-        <h2 style='margin:0.5rem 0 0 0; color:white;'>Data Senior</h2>
-        <h3 style='margin:0; color:white; opacity:0.9;'>Analytics</h3>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("## 👨‍💻 Samuel Maia")
-    st.markdown("**Analista de Dados Sênior**")
-    st.markdown("📧 smaia2@gmail.com")
-    st.markdown("🔗 linkedin.com/in/samuelmaia-data-analyst")
-    st.markdown("🐙 https://github.com/samuelmaia-data-analyst/data-senior-analytics")
-    st.markdown("---")
-
-    # Navegação
-    st.markdown("### 🧭 Navegação")
-    page = st.radio(
-        "Ir para:",
-        ["🏠 Home",
-         "📤 Upload de Dados",
-         "📊 Visualizar Dados",
-         "📈 Análise Exploratória",
-         "📊 Visualizações Completas",
-         "🔍 Análise Estatística Avançada",
-         "📉 Séries Temporais",
-         "📊 Correlações e Relacionamentos",
-         "📋 Relatórios Automáticos",
-         "💾 Banco de Dados",
-         "⚙️ Configurações"],
-        label_visibility="collapsed"
-    )
-
-    st.markdown("---")
-
-    # Informações dos dados atuais
-    if st.session_state.data is not None:
-        st.markdown("### 📁 Dados Atuais")
-        with st.container():
-            st.markdown(f"**Arquivo:** {st.session_state.data_name[:30]}..." if len(
-                st.session_state.data_name) > 30 else f"**Arquivo:** {st.session_state.data_name}")
-            st.markdown(f"**Linhas:** {st.session_state.data.shape[0]:,}")
-            st.markdown(f"**Colunas:** {st.session_state.data.shape[1]}")
-            st.markdown(f"**Memória:** {st.session_state.data.memory_usage(deep=True).sum() / 1024 ** 2:.2f} MB")
-    else:
-        st.info("👆 **Dica:** Faça upload de um arquivo na página '📤 Upload de Dados'")
-
-
-page_context = {
-    "st": st,
-    "pd": pd,
-    "np": np,
-    "px": px,
-    "go": go,
-    "datetime": datetime,
-    "db": db,
-    "settings": Settings,
-    "scipy_available": SCIPY_AVAILABLE,
-    "stats": stats,
-    "detect_column_types": detect_column_types,
-    "get_basic_stats": get_basic_stats,
-    "interpret_correlation": interpret_correlation,
-}
-
-if page == "🏠 Home":
-    render_home_page(db)
-
-elif page == "📤 Upload de Dados":
-    render_upload_page(db, Settings)
-
-elif page == "📊 Visualizar Dados":
-    render_data_view_page(**page_context)
-
-elif page == "📈 Análise Exploratória":
-    render_exploratory_page(**page_context)
-
-elif page == "📊 Visualizações Completas":
-    render_visualizations_page(**page_context)
-
-elif page == "🔍 Análise Estatística Avançada":
-    render_advanced_stats_page(**page_context)
-
-elif page == "📉 Séries Temporais":
-    render_time_series_page(**page_context)
-
-elif page == "📊 Correlações e Relacionamentos":
-    render_correlations_page(**page_context)
-
-elif page == "📋 Relatórios Automáticos":
-    render_reports_page(**page_context)
-
-elif page == "💾 Banco de Dados":
-    render_database_page(**page_context)
-
-elif page == "⚙️ Configurações":
-    render_settings_page(**page_context)
-
-# Footer
-st.markdown("---")
-st.markdown(
-    """
-    <div style='text-align: center; padding: 1rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px;'>
-        <p style='font-size: 1.1rem; font-weight: bold;'>Desenvolvido por <span style='color: #FF4B4B;'>Samuel Maia</span> - Analista de Dados Sênior</p>
-        <p style='font-size: 0.9rem; color: #555;'>
-            📧 smaia2@gmail.com | 
-            🔗 linkedin.com/in/samuelmaia-data-analyst | 
-            🐙 github.com/samuelmaia-data-analyst/portfolio-analista-dados
-        </p>
-        <p style='font-size: 0.8rem; color: #888;'>Python 3.14.2 | Streamlit 1.41.1 | Pandas 2.2.3 | Plotly 6.0.0</p>
-        <p style='font-size: 0.8rem; color: #888;'>© 2025 - Todos os direitos reservados</p>
-    </div>
-    """,
-    unsafe_allow_html=True
+""",
+    unsafe_allow_html=True,
 )
 
 
+@st.cache_resource
+def get_db() -> SQLiteManager:
+    return SQLiteManager()
+
+
+@st.cache_data
+def load_default_demo_data() -> pd.DataFrame:
+    demo_path = Settings.SAMPLE_DATA_DIR / "default_demo.csv"
+    if demo_path.exists():
+        return pd.read_csv(demo_path)
+    return pd.DataFrame()
+
+
+def ensure_session_defaults() -> None:
+    if "data" not in st.session_state:
+        st.session_state.data = None
+    if "data_name" not in st.session_state:
+        st.session_state.data_name = None
+    if "data_source" not in st.session_state:
+        st.session_state.data_source = None
+
+    if st.session_state.data is None:
+        demo_df = load_default_demo_data()
+        if not demo_df.empty:
+            st.session_state.data = demo_df
+            st.session_state.data_name = "default_demo.csv"
+            st.session_state.data_source = "sample_auto"
+
+
+def render_header() -> None:
+    st.markdown('<h1 class="app-title">Data Senior Analytics</h1>', unsafe_allow_html=True)
+    st.markdown(
+        '<p class="app-subtitle">Senior-level analytics dashboard for business decision support</p>',
+        unsafe_allow_html=True,
+    )
+
+
+def render_home(df: pd.DataFrame | None, db: SQLiteManager) -> None:
+    st.subheader("Executive Summary")
+
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Python", "3.11+")
+    with col2:
+        st.metric("Framework", "Streamlit")
+    with col3:
+        st.metric("Source", "Kaggle")
+    with col4:
+        st.metric("Tables", len(db.list_tables()))
+
+    left, right = st.columns(2)
+    with left:
+        st.markdown('<div class="panel">', unsafe_allow_html=True)
+        st.markdown("### Business Goal")
+        st.write("Transform raw datasets into validated analytical insights for faster decisions.")
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    with right:
+        st.markdown('<div class="panel">', unsafe_allow_html=True)
+        st.markdown("### Current Data Status")
+        if df is not None and not df.empty:
+            st.write(f"Dataset: **{st.session_state.data_name}**")
+            st.write(f"Rows: **{df.shape[0]:,}**")
+            st.write(f"Columns: **{df.shape[1]}**")
+        else:
+            st.write("No dataset loaded yet.")
+        st.markdown("</div>", unsafe_allow_html=True)
+
+
+def render_upload(db: SQLiteManager) -> None:
+    st.subheader("Data Upload")
+    uploaded = st.file_uploader("Upload CSV or Excel", type=["csv", "xlsx", "xls"])
+
+    if uploaded is None:
+        st.info("Upload a file to replace the default demo dataset.")
+        return
+
+    if uploaded.name.endswith(".csv"):
+        df = pd.read_csv(uploaded)
+    else:
+        df = pd.read_excel(uploaded)
+
+    st.session_state.data = df
+    st.session_state.data_name = uploaded.name
+    st.session_state.data_source = "upload"
+
+    st.success(f"Loaded: {uploaded.name}")
+    st.dataframe(df.head(50), use_container_width=True)
+
+    table_name = st.text_input("SQLite table name", value=uploaded.name.replace(".", "_"))
+    if st.button("Save to SQLite"):
+        ok = db.df_to_sql(df, table_name)
+        if ok:
+            st.success(f"Saved to table: {table_name}")
+        else:
+            st.error("Failed to save data to SQLite.")
+
+
+def render_data_preview(df: pd.DataFrame | None) -> None:
+    st.subheader("Data Preview")
+    if df is None or df.empty:
+        st.warning("No data available.")
+        return
+
+    st.dataframe(df.head(200), use_container_width=True)
+
+    info = pd.DataFrame(
+        {
+            "column": df.columns,
+            "dtype": df.dtypes.astype(str).values,
+            "missing": df.isna().sum().values,
+            "unique": [df[c].nunique(dropna=True) for c in df.columns],
+        }
+    )
+    st.markdown("### Column Profile")
+    st.dataframe(info, use_container_width=True)
+
+
+def render_eda(df: pd.DataFrame | None) -> None:
+    st.subheader("Exploratory Analysis")
+    if df is None or df.empty:
+        st.warning("No data available.")
+        return
+
+    numeric = df.select_dtypes(include="number")
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Rows", f"{len(df):,}")
+    with col2:
+        st.metric("Missing values", int(df.isna().sum().sum()))
+    with col3:
+        st.metric("Duplicate rows", int(df.duplicated().sum()))
+
+    if numeric.empty:
+        st.info("No numeric columns detected for descriptive stats.")
+        return
+
+    st.markdown("### Descriptive Statistics")
+    st.dataframe(numeric.describe().T, use_container_width=True)
+
+    if numeric.shape[1] > 1:
+        corr = numeric.corr(numeric_only=True)
+        fig = px.imshow(corr, text_auto=True, aspect="auto", title="Correlation Matrix")
+        st.plotly_chart(fig, use_container_width=True)
+
+
+def render_charts(df: pd.DataFrame | None) -> None:
+    st.subheader("Visualizations")
+    if df is None or df.empty:
+        st.warning("No data available.")
+        return
+
+    numeric_cols = df.select_dtypes(include="number").columns.tolist()
+    cat_cols = df.select_dtypes(include=["object", "category"]).columns.tolist()
+
+    if numeric_cols:
+        col = st.selectbox("Numeric variable", numeric_cols)
+        fig = px.histogram(df, x=col, nbins=30, title=f"Distribution: {col}")
+        st.plotly_chart(fig, use_container_width=True)
+
+    if cat_cols and numeric_cols:
+        cat = st.selectbox("Category", cat_cols)
+        val = st.selectbox("Metric", numeric_cols, index=min(1, len(numeric_cols) - 1))
+        grouped = df.groupby(cat, dropna=False)[val].mean().reset_index().sort_values(val, ascending=False)
+        fig = px.bar(grouped.head(15), x=cat, y=val, title=f"Average {val} by {cat}")
+        st.plotly_chart(fig, use_container_width=True)
+
+
+def render_database(db: SQLiteManager) -> None:
+    st.subheader("SQLite Database")
+    tables = db.list_tables()
+    if not tables:
+        st.info("No tables found in SQLite yet.")
+        return
+
+    table = st.selectbox("Table", tables)
+    count = db.fetch_scalar(f"SELECT COUNT(*) FROM {table}") or 0
+    st.metric("Rows in table", int(count))
+
+    preview = db.sql_to_df(f"SELECT * FROM {table} LIMIT 500")
+    st.dataframe(preview, use_container_width=True)
+
+
+def render_settings(df: pd.DataFrame | None) -> None:
+    st.subheader("Settings and Runtime")
+    st.json(
+        {
+            "timestamp": datetime.now().isoformat(timespec="seconds"),
+            "data_source": st.session_state.data_source,
+            "data_name": st.session_state.data_name,
+            "rows": int(df.shape[0]) if df is not None else 0,
+            "columns": int(df.shape[1]) if df is not None else 0,
+            "sqlite_path": str(Settings.SQLITE_PATH),
+        }
+    )
+
+
+def main() -> None:
+    ensure_session_defaults()
+    db = get_db()
+    df = st.session_state.data
+
+    with st.sidebar:
+        st.markdown("## Navigation")
+        page = st.radio(
+            "Go to",
+            [
+                "Home",
+                "Upload",
+                "Data Preview",
+                "Exploratory Analysis",
+                "Visualizations",
+                "Database",
+                "Settings",
+            ],
+            label_visibility="collapsed",
+        )
+
+        st.markdown("---")
+        if df is not None and not df.empty:
+            st.markdown("### Active Dataset")
+            st.caption(st.session_state.data_name)
+            st.caption(f"Rows: {df.shape[0]:,}")
+            st.caption(f"Cols: {df.shape[1]}")
+            if st.session_state.data_source == "sample_auto":
+                st.info("Default demo dataset loaded.")
+
+    render_header()
+
+    if page == "Home":
+        render_home(df, db)
+    elif page == "Upload":
+        render_upload(db)
+    elif page == "Data Preview":
+        render_data_preview(df)
+    elif page == "Exploratory Analysis":
+        render_eda(df)
+    elif page == "Visualizations":
+        render_charts(df)
+    elif page == "Database":
+        render_database(db)
+    elif page == "Settings":
+        render_settings(df)
+
+
+main()
