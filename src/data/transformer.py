@@ -26,22 +26,21 @@ class DataTransformer:
 
         def clean_name(name):
             name = str(name).lower().strip()
-            name = re.sub(r'[^\w\s]', '', name)
-            name = re.sub(r'\s+', '_', name)
+            name = re.sub(r"[^\w\s]", "", name)
+            name = re.sub(r"\s+", "_", name)
             return name
 
         original_columns = df.columns.tolist()
         df.columns = [clean_name(col) for col in df.columns]
 
-        self._log_transformation('clean_column_names', {
-            'original': original_columns,
-            'new': df.columns.tolist()
-        })
+        self._log_transformation(
+            "clean_column_names", {"original": original_columns, "new": df.columns.tolist()}
+        )
 
         logger.debug("Nomes de colunas padronizados")
         return df
 
-    def handle_missing_values(self, df, strategy='auto'):
+    def handle_missing_values(self, df, strategy="auto"):
         """
         Trata valores faltantes
 
@@ -56,40 +55,45 @@ class DataTransformer:
             logger.info("Nenhum valor faltante encontrado")
             return df
 
-        if strategy == 'drop':
+        if strategy == "drop":
             df = df.dropna()
             logger.info(f"Linhas removidas: {missing_before}")
 
-        elif strategy == 'fill_mean':
+        elif strategy == "fill_mean":
             for col in df.select_dtypes(include=[np.number]).columns:
                 df[col].fillna(df[col].mean(), inplace=True)
             logger.info("Valores faltantes preenchidos com média")
 
-        elif strategy == 'fill_median':
+        elif strategy == "fill_median":
             for col in df.select_dtypes(include=[np.number]).columns:
                 df[col].fillna(df[col].median(), inplace=True)
             logger.info("Valores faltantes preenchidos com mediana")
 
-        elif strategy == 'fill_mode':
+        elif strategy == "fill_mode":
             for col in df.columns:
-                if df[col].dtype == 'object':
-                    df[col].fillna(df[col].mode()[0] if not df[col].mode().empty else 'Unknown', inplace=True)
+                if df[col].dtype == "object":
+                    df[col].fillna(
+                        df[col].mode()[0] if not df[col].mode().empty else "Unknown", inplace=True
+                    )
             logger.info("Valores faltantes preenchidos com moda")
 
-        elif strategy == 'auto':
+        elif strategy == "auto":
             for col in df.columns:
                 if df[col].isnull().sum() > 0:
-                    if df[col].dtype in ['int64', 'float64']:
+                    if df[col].dtype in ["int64", "float64"]:
                         df[col].fillna(df[col].median(), inplace=True)
                     else:
-                        df[col].fillna(df[col].mode()[0] if not df[col].mode().empty else 'Unknown', inplace=True)
+                        df[col].fillna(
+                            df[col].mode()[0] if not df[col].mode().empty else "Unknown",
+                            inplace=True,
+                        )
             logger.info("Valores faltantes tratados automaticamente")
 
         missing_after = df.isnull().sum().sum()
-        self._log_transformation('handle_missing_values', {
-            'missing_before': missing_before,
-            'missing_after': missing_after
-        })
+        self._log_transformation(
+            "handle_missing_values",
+            {"missing_before": missing_before, "missing_after": missing_after},
+        )
 
         return df
 
@@ -106,11 +110,9 @@ class DataTransformer:
         if removed > 0:
             logger.info(f"Removidas {removed} linhas duplicadas")
 
-        self._log_transformation('remove_duplicates', {
-            'before': before,
-            'after': after,
-            'removed': removed
-        })
+        self._log_transformation(
+            "remove_duplicates", {"before": before, "after": after, "removed": removed}
+        )
 
         return df
 
@@ -122,7 +124,7 @@ class DataTransformer:
 
         for col in df.columns:
             # Tenta converter para datetime
-            if df[col].dtype == 'object':
+            if df[col].dtype == "object":
                 try:
                     df[col] = pd.to_datetime(df[col])
                     logger.debug(f"Coluna {col} convertida para datetime")
@@ -137,9 +139,7 @@ class DataTransformer:
                 except:
                     pass
 
-        self._log_transformation('convert_dtypes', {
-            'dtypes': df.dtypes.to_dict()
-        })
+        self._log_transformation("convert_dtypes", {"dtypes": df.dtypes.to_dict()})
 
         return df
 
@@ -155,26 +155,21 @@ class DataTransformer:
                 df[date_column] = pd.to_datetime(df[date_column])
 
             # Cria features de data
-            df[f'{date_column}_year'] = df[date_column].dt.year
-            df[f'{date_column}_month'] = df[date_column].dt.month
-            df[f'{date_column}_day'] = df[date_column].dt.day
-            df[f'{date_column}_dayofweek'] = df[date_column].dt.dayofweek
-            df[f'{date_column}_quarter'] = df[date_column].dt.quarter
+            df[f"{date_column}_year"] = df[date_column].dt.year
+            df[f"{date_column}_month"] = df[date_column].dt.month
+            df[f"{date_column}_day"] = df[date_column].dt.day
+            df[f"{date_column}_dayofweek"] = df[date_column].dt.dayofweek
+            df[f"{date_column}_quarter"] = df[date_column].dt.quarter
 
             logger.info(f"Features de data criadas a partir de {date_column}")
 
-        self._log_transformation('create_features', {
-            'new_columns': list(df.columns)
-        })
+        self._log_transformation("create_features", {"new_columns": list(df.columns)})
 
         return df
 
     def _log_transformation(self, operation, details):
         """Registra transformação no log interno"""
-        self.transformations_log.append({
-            'operation': operation,
-            'details': details
-        })
+        self.transformations_log.append({"operation": operation, "details": details})
 
     def get_transformation_log(self):
         """Retorna log de transformações"""

@@ -17,7 +17,11 @@ def detect_column_types(df: pd.DataFrame) -> dict[str, list[str]]:
         if non_null.empty:
             continue
         sample_size = min(len(non_null), 200)
-        sample = non_null.sample(n=sample_size, random_state=42) if len(non_null) > sample_size else non_null
+        sample = (
+            non_null.sample(n=sample_size, random_state=42)
+            if len(non_null) > sample_size
+            else non_null
+        )
         parsed = pd.to_datetime(sample, errors="coerce", infer_datetime_format=True)
         if parsed.notna().mean() >= 0.8 and col not in date_cols:
             date_cols.append(col)

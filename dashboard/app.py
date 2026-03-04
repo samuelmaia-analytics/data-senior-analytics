@@ -227,14 +227,18 @@ def render_home(df: pd.DataFrame | None, db: SQLiteManager) -> None:
         with st.container(border=True):
             st.markdown('<span class="exec-pill">Direcionamento</span>', unsafe_allow_html=True)
             st.markdown('<div class="exec-card-title">Objetivo</div>', unsafe_allow_html=True)
-            st.write("Transformar dados tabulares em insights acionáveis para decisão rápida e segura.")
+            st.write(
+                "Transformar dados tabulares em insights acionáveis para decisão rápida e segura."
+            )
             st.markdown('<div class="exec-card-title">Valor</div>', unsafe_allow_html=True)
             st.write("Fluxo analítico ponta a ponta com padrão sênior e foco em negócio.")
 
     with right:
         with st.container(border=True):
             st.markdown('<span class="exec-pill">Contexto de dados</span>', unsafe_allow_html=True)
-            st.markdown('<div class="exec-card-title">Status dos Dados</div>', unsafe_allow_html=True)
+            st.markdown(
+                '<div class="exec-card-title">Status dos Dados</div>', unsafe_allow_html=True
+            )
             if df is not None and not df.empty:
                 st.write(f"Dataset: **{st.session_state.data_name}**")
                 st.write(f"Linhas: **{df.shape[0]:,}**")
@@ -422,7 +426,12 @@ def render_charts(df: pd.DataFrame | None) -> None:
                 index=min(1, len(numeric_cols) - 1),
                 key="chart_metric",
             )
-        grouped = df.groupby(cat, dropna=False)[val].mean().reset_index().sort_values(val, ascending=False)
+        grouped = (
+            df.groupby(cat, dropna=False)[val]
+            .mean()
+            .reset_index()
+            .sort_values(val, ascending=False)
+        )
         fig = px.bar(grouped.head(15), x=cat, y=val, title=f"Média de {val} por {cat}")
         st.plotly_chart(fig, use_container_width=True)
 

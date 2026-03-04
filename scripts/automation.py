@@ -38,7 +38,7 @@ class TaskAutomation:
             "=" * 60,
             f"RELATÓRIO DIÁRIO - {datetime.now().strftime('%d/%m/%Y %H:%M')}",
             "=" * 60,
-            ""
+            "",
         ]
 
         for table in tables:
@@ -50,7 +50,7 @@ class TaskAutomation:
 
         # Salva relatório
         report_path = Settings.REPORTS_DIR / f"daily_report_{datetime.now().strftime('%Y%m%d')}.txt"
-        with open(report_path, 'w') as f:
+        with open(report_path, "w") as f:
             f.write("\n".join(report_lines))
 
         logger.success(f"Relatório salvo: {report_path}")
@@ -74,7 +74,7 @@ class TaskAutomation:
             cutoff = datetime.now() - timedelta(days=30)
             for backup in backup_dir.glob("*.db"):
                 try:
-                    file_date = datetime.strptime(backup.stem.split('_')[-2], '%Y%m%d')
+                    file_date = datetime.strptime(backup.stem.split("_")[-2], "%Y%m%d")
                     if file_date < cutoff:
                         backup.unlink()
                         logger.info(f"Backup removido: {backup}")
@@ -86,7 +86,7 @@ class TaskAutomation:
             cutoff = datetime.now() - timedelta(days=7)
             for report in Settings.REPORTS_DIR.glob("*.txt"):
                 try:
-                    file_date = datetime.strptime(report.stem.split('_')[-1], '%Y%m%d')
+                    file_date = datetime.strptime(report.stem.split("_")[-1], "%Y%m%d")
                     if file_date < cutoff:
                         report.unlink()
                         logger.info(f"Relatório removido: {report}")

@@ -211,4 +211,3 @@ class SQLiteManager:
         except Exception as exc:
             logger.error(f"Erro no backup: {exc}")
             return None
-

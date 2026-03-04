@@ -8,48 +8,48 @@ import yaml
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description='Set Kaggle provenance and mark as approved.')
-    parser.add_argument('--dataset-name', required=True)
-    parser.add_argument('--dataset-url', required=True)
-    parser.add_argument('--owner', required=True)
-    parser.add_argument('--license', required=True)
-    parser.add_argument('--snapshot-date', required=False, default=date.today().isoformat())
-    parser.add_argument('--retrieval-date', required=False, default=date.today().isoformat())
-    parser.add_argument('--retrieval-method', required=False, default='manual_download')
-    parser.add_argument('--data-dictionary-url', required=False, default='')
+    parser = argparse.ArgumentParser(description="Set Kaggle provenance and mark as approved.")
+    parser.add_argument("--dataset-name", required=True)
+    parser.add_argument("--dataset-url", required=True)
+    parser.add_argument("--owner", required=True)
+    parser.add_argument("--license", required=True)
+    parser.add_argument("--snapshot-date", required=False, default=date.today().isoformat())
+    parser.add_argument("--retrieval-date", required=False, default=date.today().isoformat())
+    parser.add_argument("--retrieval-method", required=False, default="manual_download")
+    parser.add_argument("--data-dictionary-url", required=False, default="")
     return parser.parse_args()
 
 
 def update_yaml(args: argparse.Namespace) -> None:
-    path = Path('config/data_source.yaml')
-    data = yaml.safe_load(path.read_text(encoding='utf-8')) or {}
-    data.setdefault('project_dataset', {})
+    path = Path("config/data_source.yaml")
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    data.setdefault("project_dataset", {})
 
-    project = data['project_dataset']
+    project = data["project_dataset"]
     project.update(
         {
-            'provenance_status': 'approved',
-            'source_type': 'kaggle',
-            'source_platform': 'Kaggle',
-            'dataset_name': args.dataset_name,
-            'dataset_url': args.dataset_url,
-            'owner': args.owner,
-            'version_or_snapshot_date': args.snapshot_date,
-            'license': args.license,
-            'retrieval_method': args.retrieval_method,
-            'retrieval_date': args.retrieval_date,
-            'local_storage_path': 'data/raw/',
-            'commit_data_files': False,
-            'data_dictionary_url': args.data_dictionary_url or args.dataset_url,
-            'notes': 'Approved Kaggle provenance metadata.',
+            "provenance_status": "approved",
+            "source_type": "kaggle",
+            "source_platform": "Kaggle",
+            "dataset_name": args.dataset_name,
+            "dataset_url": args.dataset_url,
+            "owner": args.owner,
+            "version_or_snapshot_date": args.snapshot_date,
+            "license": args.license,
+            "retrieval_method": args.retrieval_method,
+            "retrieval_date": args.retrieval_date,
+            "local_storage_path": "data/raw/",
+            "commit_data_files": False,
+            "data_dictionary_url": args.data_dictionary_url or args.dataset_url,
+            "notes": "Approved Kaggle provenance metadata.",
         }
     )
 
-    path.write_text(yaml.safe_dump(data, sort_keys=False, allow_unicode=True), encoding='utf-8')
+    path.write_text(yaml.safe_dump(data, sort_keys=False, allow_unicode=True), encoding="utf-8")
 
 
 def update_markdown(args: argparse.Namespace) -> None:
-    md_path = Path('docs/DATA_PROVENANCE.md')
+    md_path = Path("docs/DATA_PROVENANCE.md")
     content = f"""# Data Provenance - Kaggle
 
 ## Status
@@ -79,16 +79,16 @@ def update_markdown(args: argparse.Namespace) -> None:
 - Script de validação de proveniência: [scripts/validate_data_provenance.py](../scripts/validate_data_provenance.py)
 - Script de geração sintética (opcional): [scripts/generate_sample_data.py](../scripts/generate_sample_data.py)
 """
-    md_path.write_text(content, encoding='utf-8')
+    md_path.write_text(content, encoding="utf-8")
 
 
 def main() -> int:
     args = parse_args()
     update_yaml(args)
     update_markdown(args)
-    print('Kaggle provenance updated and marked as approved.')
+    print("Kaggle provenance updated and marked as approved.")
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     raise SystemExit(main())
