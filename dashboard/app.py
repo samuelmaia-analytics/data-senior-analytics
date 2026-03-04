@@ -1,4 +1,4 @@
-"""Executive Streamlit dashboard with robust runtime behavior."""
+﻿"""Executive Streamlit dashboard with robust runtime behavior."""
 
 from __future__ import annotations
 
@@ -22,13 +22,13 @@ from src.data.sqlite_manager import SQLiteManager  # noqa: E402
 from src.utils.observability import get_structured_logger, new_trace_id, timed_stage  # noqa: E402
 
 PAGE_OPTIONS = [
-    "Resumo",
+    "Overview",
     "Upload",
-    "Dados",
+    "Data",
     "EDA",
-    "Visualizações",
-    "Banco",
-    "Configurações",
+    "Visualizations",
+    "Database",
+    "Settings",
 ]
 
 st.set_page_config(
@@ -167,7 +167,7 @@ def ensure_session_defaults() -> None:
     if "data_source" not in st.session_state:
         st.session_state.data_source = None
     if "selected_page" not in st.session_state:
-        st.session_state.selected_page = "Resumo"
+        st.session_state.selected_page = "Overview"
 
     if st.session_state.data is None:
         demo_df = load_default_demo_data()
@@ -182,7 +182,7 @@ def render_header(df: pd.DataFrame | None) -> None:
         """
         <div class="hero">
             <h1 class="hero-title">Data Senior Analytics</h1>
-            <p class="hero-subtitle">Painel executivo para diagnóstico, exploração e suporte à decisão.</p>
+            <p class="hero-subtitle">Executive dashboard for diagnostics, exploration, and decision support.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -190,14 +190,14 @@ def render_header(df: pd.DataFrame | None) -> None:
 
     c1, c2, c3 = st.columns([1, 1, 2])
     with c1:
-        st.metric("Ambiente", "Executivo")
+        st.metric("Environment", "Executive")
     with c2:
         st.metric("Build", get_build_id())
     with c3:
         if df is not None and not df.empty:
-            st.metric("Dataset ativo", st.session_state.data_name)
+            st.metric("Active dataset", st.session_state.data_name)
         else:
-            st.metric("Dataset ativo", "Sem dados")
+            st.metric("Active dataset", "No data")
 
     st.markdown(
         """
@@ -213,7 +213,7 @@ def render_header(df: pd.DataFrame | None) -> None:
 
 
 def render_home(df: pd.DataFrame | None, db: SQLiteManager) -> None:
-    st.subheader("Resumo Executivo")
+    st.subheader("Executive Summary")
 
     c1, c2, c3, c4 = st.columns(4)
     with c1:
@@ -221,95 +221,91 @@ def render_home(df: pd.DataFrame | None, db: SQLiteManager) -> None:
     with c2:
         st.metric("Framework", "Streamlit")
     with c3:
-        st.metric("Fonte", "Kaggle")
+        st.metric("Source", "Kaggle")
     with c4:
-        st.metric("Tabelas SQLite", len(db.list_tables()))
+        st.metric("SQLite tables", len(db.list_tables()))
 
     left, right = st.columns(2)
     with left:
         with st.container(border=True):
-            st.markdown('<span class="exec-pill">Direcionamento</span>', unsafe_allow_html=True)
-            st.markdown('<div class="exec-card-title">Objetivo</div>', unsafe_allow_html=True)
-            st.write(
-                "Transformar dados tabulares em insights acionáveis para decisão rápida e segura."
-            )
-            st.markdown('<div class="exec-card-title">Valor</div>', unsafe_allow_html=True)
-            st.write("Fluxo analítico ponta a ponta com padrão sênior e foco em negócio.")
+            st.markdown('<span class="exec-pill">Direction</span>', unsafe_allow_html=True)
+            st.markdown('<div class="exec-card-title">Objective</div>', unsafe_allow_html=True)
+            st.write("Turn tabular data into actionable insights for fast, reliable decisions.")
+            st.markdown('<div class="exec-card-title">Value</div>', unsafe_allow_html=True)
+            st.write("End-to-end analytics workflow with senior engineering standards.")
 
     with right:
         with st.container(border=True):
-            st.markdown('<span class="exec-pill">Contexto de dados</span>', unsafe_allow_html=True)
-            st.markdown(
-                '<div class="exec-card-title">Status dos Dados</div>', unsafe_allow_html=True
-            )
+            st.markdown('<span class="exec-pill">Data context</span>', unsafe_allow_html=True)
+            st.markdown('<div class="exec-card-title">Data Status</div>', unsafe_allow_html=True)
             if df is not None and not df.empty:
                 st.write(f"Dataset: **{st.session_state.data_name}**")
-                st.write(f"Linhas: **{df.shape[0]:,}**")
-                st.write(f"Colunas: **{df.shape[1]}**")
-                st.write(f"Fonte: **{st.session_state.data_source}**")
+                st.write(f"Rows: **{df.shape[0]:,}**")
+                st.write(f"Columns: **{df.shape[1]}**")
+                st.write(f"Source: **{st.session_state.data_source}**")
             else:
-                st.info("Nenhum dataset carregado no momento.")
+                st.info("No dataset loaded.")
 
     s1, s2, s3 = st.columns(3)
     if df is not None and not df.empty:
         null_rate = (df.isna().sum().sum() / max(1, (df.shape[0] * df.shape[1]))) * 100
         dup_rate = (df.duplicated().sum() / max(1, df.shape[0])) * 100
         numeric_cols = df.select_dtypes(include="number").shape[1]
-        insight_msg = f"Dataset pronto para exploracao com {numeric_cols} colunas numericas."
-        risk_msg = f"Nulos: {null_rate:.2f}% | Duplicadas: {dup_rate:.2f}%."
-        action_msg = "Priorizar EDA e, em seguida, consolidar tabela curada no SQLite."
+        insight_msg = f"Dataset ready for exploration with {numeric_cols} numeric columns."
+        risk_msg = f"Missing: {null_rate:.2f}% | Duplicates: {dup_rate:.2f}%."
+        action_msg = "Run EDA first, then persist curated outputs in SQLite."
     else:
-        insight_msg = "Sem dataset ativo para gerar leitura executiva."
-        risk_msg = "Sem risco calculavel sem dados carregados."
-        action_msg = "Iniciar pela pagina Upload e validar qualidade minima."
+        insight_msg = "No active dataset to generate executive insights."
+        risk_msg = "Risk cannot be estimated without loaded data."
+        action_msg = "Start with the Upload page and validate minimum data quality."
 
     with s1:
         with st.container(border=True):
             st.markdown('<span class="exec-pill">Insight</span>', unsafe_allow_html=True)
-            st.write(insight_msg.replace("exploracao", "exploração"))
+            st.write(insight_msg)
     with s2:
         with st.container(border=True):
-            st.markdown('<span class="exec-pill">Risco</span>', unsafe_allow_html=True)
+            st.markdown('<span class="exec-pill">Risk</span>', unsafe_allow_html=True)
             st.write(risk_msg)
     with s3:
         with st.container(border=True):
-            st.markdown('<span class="exec-pill">Ação</span>', unsafe_allow_html=True)
+            st.markdown('<span class="exec-pill">Action</span>', unsafe_allow_html=True)
             st.write(action_msg)
 
-    st.markdown("### Diferenciais Profissionais")
+    st.markdown("### Professional Highlights")
     d1, d2 = st.columns(2)
     with d1:
         with st.container(border=True):
-            st.markdown("#### Para Recrutadores")
-            st.write("- Entrega ponta a ponta: ingestão, EDA, visualização e persistência.")
-            st.write("- Comunicação executiva com foco em decisão e valor de negócio.")
-            st.write("- Projeto com padrão de qualidade e reprodutibilidade.")
+            st.markdown("#### For Recruiters")
+            st.write("- End-to-end delivery: ingestion, EDA, visualization, and persistence.")
+            st.write("- Executive communication focused on business value and decisions.")
+            st.write("- Project quality with reproducibility and governance.")
     with d2:
         with st.container(border=True):
-            st.markdown("#### Para Liderança Técnica")
-            st.write("- Arquitetura modular com responsabilidades claras.")
-            st.write("- Quality gates ativos: lint, testes e preflight de deploy.")
-            st.write("- Governança de dados explícita com proveniência Kaggle.")
+            st.markdown("#### For Technical Leads")
+            st.write("- Modular architecture with clear responsibilities.")
+            st.write("- Active quality gates: lint, tests, and deployment preflight.")
+            st.write("- Explicit data governance with Kaggle provenance.")
 
-    st.markdown("### Maturidade Analítica")
+    st.markdown("### Analytics Maturity")
     m1, m2, m3 = st.columns(3)
     with m1:
-        st.caption("Confiabilidade de Dados")
+        st.caption("Data Reliability")
         st.progress(88)
     with m2:
-        st.caption("Prontidão para Produção")
+        st.caption("Production Readiness")
         st.progress(90)
     with m3:
-        st.caption("Clareza Executiva")
+        st.caption("Executive Clarity")
         st.progress(92)
 
-    st.markdown("### Sinais de Senioridade Técnica")
+    st.markdown("### Technical Seniority Signals")
     st.write(
-        "- Arquitetura em camadas com responsabilidades claras (`dashboard/`, `src/`, `config/`)."
+        "- Layered architecture with clear responsibilities (`dashboard/`, `src/`, `config/`)."
     )
-    st.write("- Pipeline executável localmente com `make` e validações de preflight.")
-    st.write("- Qualidade com testes automatizados, cobertura e contrato de dados.")
-    st.write("- Dashboard orientado à decisão com KPI, tendência e leitura executiva.")
+    st.write("- Locally executable pipeline via `make` and preflight validations.")
+    st.write("- Quality standards with automated tests, coverage, and data contracts.")
+    st.write("- Decision-oriented dashboard with KPI, trend, and executive narrative.")
 
     if df is not None and not df.empty and {"categoria", "valor_total"}.issubset(df.columns):
         category_revenue = (
@@ -325,19 +321,19 @@ def render_home(df: pd.DataFrame | None, db: SQLiteManager) -> None:
             x="valor_total",
             y="categoria",
             orientation="h",
-            title=f"Top {top_n} Categorias por Receita",
-            labels={"categoria": "categoria_produto", "valor_total": "receita"},
+            title=f"Top {top_n} Categories by Revenue",
+            labels={"categoria": "product_category", "valor_total": "revenue"},
         )
         fig.update_layout(yaxis={"categoryorder": "total ascending"})
         st.plotly_chart(fig, use_container_width=True)
 
 
 def render_upload(db: SQLiteManager) -> None:
-    st.subheader("Upload de Dados")
-    uploaded = st.file_uploader("Envie CSV ou Excel", type=["csv", "xlsx", "xls"])
+    st.subheader("Data Upload")
+    uploaded = st.file_uploader("Upload CSV or Excel", type=["csv", "xlsx", "xls"])
 
     if uploaded is None:
-        st.info("Envie um arquivo para substituir o dataset de demonstração.")
+        st.info("Upload a file to replace the default demo dataset.")
         return
 
     if uploaded.name.endswith(".csv"):
@@ -351,74 +347,74 @@ def render_upload(db: SQLiteManager) -> None:
 
     k1, k2, k3 = st.columns(3)
     with k1:
-        st.metric("Linhas", f"{df.shape[0]:,}")
+        st.metric("Rows", f"{df.shape[0]:,}")
     with k2:
-        st.metric("Colunas", df.shape[1])
+        st.metric("Columns", df.shape[1])
     with k3:
-        st.metric("Memória", f"{df.memory_usage(deep=True).sum() / (1024 * 1024):.2f} MB")
+        st.metric("Memory", f"{df.memory_usage(deep=True).sum() / (1024 * 1024):.2f} MB")
 
-    st.success(f"Arquivo carregado com sucesso: {uploaded.name}")
-    st.caption("Prévia (primeiras 50 linhas)")
+    st.success(f"File loaded successfully: {uploaded.name}")
+    st.caption("Preview (first 50 rows)")
     st.table(df.head(50))
 
     table_name = st.text_input(
-        "Nome da tabela SQLite",
+        "SQLite table name",
         value=uploaded.name.replace(".", "_"),
         key="upload_table_name",
     )
-    if st.button("Salvar no SQLite", key="save_sqlite_button", use_container_width=True):
+    if st.button("Save to SQLite", key="save_sqlite_button", use_container_width=True):
         ok = db.df_to_sql(df, table_name)
         if ok:
-            st.success(f"Tabela salva: {table_name}")
+            st.success(f"Table saved: {table_name}")
         else:
-            st.error("Falha ao salvar no SQLite.")
+            st.error("Failed to save table to SQLite.")
 
 
 def render_data_preview(df: pd.DataFrame | None) -> None:
-    st.subheader("Visualização dos Dados")
+    st.subheader("Data Preview")
     if df is None or df.empty:
-        st.warning("Nenhum dado disponível.")
+        st.warning("No data available.")
         return
 
-    tab1, tab2 = st.tabs(["Amostra", "Perfil de Colunas"])
+    tab1, tab2 = st.tabs(["Sample", "Column Profile"])
 
     with tab1:
-        st.caption("Prévia (primeiras 200 linhas)")
+        st.caption("Preview (first 200 rows)")
         st.table(df.head(200))
 
     with tab2:
         info = pd.DataFrame(
             {
-                "Coluna": df.columns,
-                "Tipo": df.dtypes.astype(str).values,
-                "Nulos": df.isna().sum().values,
-                "Únicos": [df[c].nunique(dropna=True) for c in df.columns],
+                "Column": df.columns,
+                "Type": df.dtypes.astype(str).values,
+                "Missing": df.isna().sum().values,
+                "Unique": [df[c].nunique(dropna=True) for c in df.columns],
             }
         )
         st.table(info)
 
 
 def render_eda(df: pd.DataFrame | None) -> None:
-    st.subheader("Análise Exploratória")
+    st.subheader("Exploratory Analysis")
     if df is None or df.empty:
-        st.warning("Nenhum dado disponível.")
+        st.warning("No data available.")
         return
 
     numeric = df.select_dtypes(include="number")
 
     c1, c2, c3 = st.columns(3)
     with c1:
-        st.metric("Linhas", f"{len(df):,}")
+        st.metric("Rows", f"{len(df):,}")
     with c2:
-        st.metric("Valores nulos", int(df.isna().sum().sum()))
+        st.metric("Missing values", int(df.isna().sum().sum()))
     with c3:
-        st.metric("Linhas duplicadas", int(df.duplicated().sum()))
+        st.metric("Duplicate rows", int(df.duplicated().sum()))
 
     if numeric.empty:
-        st.info("Não há colunas numéricas para estatística descritiva.")
+        st.info("No numeric columns available for descriptive statistics.")
         return
 
-    tab_stats, tab_corr = st.tabs(["Estatística", "Correlação"])
+    tab_stats, tab_corr = st.tabs(["Statistics", "Correlation"])
 
     with tab_stats:
         st.table(numeric.describe().T)
@@ -426,33 +422,33 @@ def render_eda(df: pd.DataFrame | None) -> None:
     with tab_corr:
         if numeric.shape[1] > 1:
             corr = numeric.corr(numeric_only=True)
-            fig = px.imshow(corr, text_auto=True, aspect="auto", title="Matriz de Correlação")
+            fig = px.imshow(corr, text_auto=True, aspect="auto", title="Correlation Matrix")
             st.plotly_chart(fig, use_container_width=True)
         else:
-            st.info("São necessárias ao menos 2 colunas numéricas.")
+            st.info("At least 2 numeric columns are required.")
 
 
 def render_charts(df: pd.DataFrame | None) -> None:
-    st.subheader("Visualizações")
+    st.subheader("Visualizations")
     if df is None or df.empty:
-        st.warning("Nenhum dado disponível.")
+        st.warning("No data available.")
         return
 
     numeric_cols = df.select_dtypes(include="number").columns.tolist()
     cat_cols = df.select_dtypes(include=["object", "category"]).columns.tolist()
 
     if numeric_cols:
-        col = st.selectbox("Variável numérica", numeric_cols, key="chart_numeric_variable")
-        fig = px.histogram(df, x=col, nbins=30, title=f"Distribuição: {col}")
+        col = st.selectbox("Numeric variable", numeric_cols, key="chart_numeric_variable")
+        fig = px.histogram(df, x=col, nbins=30, title=f"Distribution: {col}")
         st.plotly_chart(fig, use_container_width=True)
 
     if cat_cols and numeric_cols:
         left, right = st.columns(2)
         with left:
-            cat = st.selectbox("Categoria", cat_cols, key="chart_category")
+            cat = st.selectbox("Category", cat_cols, key="chart_category")
         with right:
             val = st.selectbox(
-                "Métrica",
+                "Metric",
                 numeric_cols,
                 index=min(1, len(numeric_cols) - 1),
                 key="chart_metric",
@@ -463,28 +459,28 @@ def render_charts(df: pd.DataFrame | None) -> None:
             .reset_index()
             .sort_values(val, ascending=False)
         )
-        fig = px.bar(grouped.head(15), x=cat, y=val, title=f"Média de {val} por {cat}")
+        fig = px.bar(grouped.head(15), x=cat, y=val, title=f"Average {val} by {cat}")
         st.plotly_chart(fig, use_container_width=True)
 
 
 def render_database(db: SQLiteManager) -> None:
-    st.subheader("Banco SQLite")
+    st.subheader("SQLite Database")
     tables = db.list_tables()
     if not tables:
-        st.info("Nenhuma tabela encontrada no SQLite.")
+        st.info("No tables found in SQLite.")
         return
 
-    table = st.selectbox("Tabela", tables, key="database_table")
+    table = st.selectbox("Table", tables, key="database_table")
     count = db.fetch_scalar(f"SELECT COUNT(*) FROM [{table}]") or 0
-    st.metric("Linhas na tabela", int(count))
+    st.metric("Rows in table", int(count))
 
     preview = db.sql_to_df(f"SELECT * FROM [{table}] LIMIT 500")
-    st.caption("Prévia da tabela (até 500 linhas)")
+    st.caption("Table preview (up to 500 rows)")
     st.table(preview)
 
 
 def render_settings(df: pd.DataFrame | None) -> None:
-    st.subheader("Configurações e Runtime")
+    st.subheader("Settings and Runtime")
     st.json(
         {
             "timestamp": datetime.now().isoformat(timespec="seconds"),
@@ -516,7 +512,7 @@ def main() -> None:
 
     render_header(df)
     page = st.radio(
-        "Navegação",
+        "Navigation",
         PAGE_OPTIONS,
         horizontal=True,
         key="selected_page",
@@ -524,30 +520,36 @@ def main() -> None:
     )
 
     with st.sidebar:
-        st.markdown("## Contexto")
+        st.markdown("## Context")
         st.caption(f"Build: `{get_build_id()}`")
-        st.caption(f"Página: **{page}**")
+        st.caption(f"Page: **{page}**")
         if df is not None and not df.empty:
             st.caption(f"Dataset: **{st.session_state.data_name}**")
-            st.caption(f"Linhas: {df.shape[0]:,}")
-            st.caption(f"Colunas: {df.shape[1]}")
+            st.caption(f"Rows: {df.shape[0]:,}")
+            st.caption(f"Columns: {df.shape[1]}")
             if st.session_state.data_source == "sample_auto":
-                st.info("Dataset padrão carregado automaticamente.")
+                st.info("Default demo dataset loaded automatically.")
 
-        if st.button("Resetar sessão", use_container_width=True):
+        st.link_button(
+            "PT-BR version",
+            "https://github.com/samuelmaia-data-analyst/data-senior-analytics/blob/main/README.md",
+            use_container_width=True,
+        )
+
+        if st.button("Reset session", use_container_width=True):
             for key in ("data", "data_name", "data_source"):
                 if key in st.session_state:
                     del st.session_state[key]
             st.rerun()
 
     page_handlers = {
-        "Resumo": lambda: render_home(df, db),
+        "Overview": lambda: render_home(df, db),
         "Upload": lambda: render_upload(db),
-        "Dados": lambda: render_data_preview(df),
+        "Data": lambda: render_data_preview(df),
         "EDA": lambda: render_eda(df),
-        "Visualizações": lambda: render_charts(df),
-        "Banco": lambda: render_database(db),
-        "Configurações": lambda: render_settings(df),
+        "Visualizations": lambda: render_charts(df),
+        "Database": lambda: render_database(db),
+        "Settings": lambda: render_settings(df),
     }
 
     try:
@@ -561,7 +563,7 @@ def main() -> None:
         APP_LOGGER.error(
             "page_render_failed", extra={"trace_id": trace_id, "page": page, "error": str(exc)}
         )
-        st.error("Falha ao renderizar esta página. O app continua disponível.")
+        st.error("Failed to render this page. The app is still available.")
         st.exception(exc)
 
 
