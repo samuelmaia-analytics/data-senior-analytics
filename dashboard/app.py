@@ -336,10 +336,30 @@ def render_upload(db: SQLiteManager) -> None:
         st.info("Upload a file to replace the default demo dataset.")
         return
 
-    if uploaded.name.endswith(".csv"):
-        df = pd.read_csv(uploaded)
-    else:
-        df = pd.read_excel(uploaded)
+    try:
+        if uploaded.name.lower().endswith(".csv"):
+            # Common fallback chain for CSV files produced by spreadsheet tools.
+            for encoding in ("utf-8", "utf-8-sig", "latin-1"):
+                uploaded.seek(0)
+                try:
+                    df = pd.read_csv(uploaded, encoding=encoding)
+                    break
+                except UnicodeDecodeError:
+                    continue
+            else:
+                uploaded.seek(0)
+                df = pd.read_csv(uploaded)
+        else:
+            uploaded.seek(0)
+            df = pd.read_excel(uploaded)
+    except Exception as exc:  # noqa: BLE001
+        st.error("Failed to read the uploaded file. Please verify format and encoding.")
+        st.exception(exc)
+        return
+
+    if df.empty:
+        st.warning("The uploaded file contains no rows.")
+        return
 
     st.session_state.data = df
     st.session_state.data_name = uploaded.name
