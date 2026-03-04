@@ -1,7 +1,9 @@
 ﻿-r requirements.txt
 
 pytest==8.4.2
+pytest-cov==7.0.0
 ruff==0.13.2
+black==26.1.0
+mypy==1.19.1
 schedule==1.2.2
 pre-commit==4.3.0
-

@@ -1,238 +1,72 @@
-# Data Senior Analytics
+﻿# Data Senior Analytics
 
-[Versão em Português (PT-BR)](README.md)
+[Versao em Portugues](README.md)
 
-![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.41.1-FF4B4B?logo=streamlit&logoColor=white)
-![Pandas](https://img.shields.io/badge/Pandas-2.2.3-150458?logo=pandas&logoColor=white)
-![NumPy](https://img.shields.io/badge/NumPy-2.4.2-013243?logo=numpy&logoColor=white)
-![Plotly](https://img.shields.io/badge/Plotly-6.5.2-3F4F75?logo=plotly&logoColor=white)
-![SciPy](https://img.shields.io/badge/SciPy-1.15.2-8CAAE6?logo=scipy&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+[![CI](https://github.com/samuelmaia-data-analyst/data-senior-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/samuelmaia-data-analyst/data-senior-analytics/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/samuelmaia-data-analyst/data-senior-analytics/branch/main/graph/badge.svg)](https://codecov.io/gh/samuelmaia-data-analyst/data-senior-analytics)
+[![License](https://img.shields.io/github/license/samuelmaia-data-analyst/data-senior-analytics)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/downloads/)
 
-Business-oriented analytics application that transforms raw tabular data into actionable insights through exploratory analysis, statistical testing, and an interactive dashboard.
+Business-focused analytics project that turns raw tabular files into decision-ready insights with a reproducible pipeline and interactive dashboard.
 
 Live demo: https://data-analytics-sr.streamlit.app
 
-## Summary
-- [Executive Summary](#executive-summary)
-- [Data Governance (Kaggle)](#data-governance-kaggle)
-- [Business Problem](#business-problem)
-- [Data Strategy](#data-strategy)
-- [Architecture Overview](#architecture-overview)
-- [Detailed Architecture and ADRs](#detailed-architecture-and-adrs)
-- [Project Structure](#project-structure)
-- [Tech Stack](#tech-stack)
-- [Reproducibility (How to Run)](#reproducibility-how-to-run)
-- [Streamlit Cloud Deployment](#streamlit-cloud-deployment)
-- [Executive Quality Standards](#executive-quality-standards)
-- [Contact](#contact)
-- [License](#license)
-
 ## Executive Summary
-This project delivers an end-to-end senior-level analytics workflow: data ingestion, quality diagnostics, exploratory analysis, statistical validation, and insight communication.
+- Problem: teams depend on slow spreadsheet workflows and non-standard analysis quality.
+- Approach: layered pipeline (`raw -> bronze -> silver -> gold`) with ingestion, transformation, EDA, and dashboard delivery.
+- Results: CI-gated analytics repo with data governance, output contracts, and reproducible execution.
 
-It was designed so recruiters and technical leaders can quickly evaluate skills in:
-- Business-oriented data analysis
-- Analytics engineering and software quality
-- Value delivery through an interactive analytical product
+## Impact
+- Metrics: CI automation enforces lint + format + tests + coverage (`>=70%`) on every PR.
+- Assumptions: input is CSV/XLSX from business users, with mixed quality and partial missing values.
+- Outcomes: faster insight turnaround with stable output schema for dashboard and stakeholder consumption.
 
-## Data Governance (Kaggle)
-- Official analytical dataset source: **Kaggle (real dataset)**
-- Raw data is not versioned in Git (`data/raw/*` is ignored)
-- `*_exemplo.csv` files are synthetic and intended only for local demo
-- Mandatory provenance records:
-  - [docs/DATA_PROVENANCE.md](docs/DATA_PROVENANCE.md)
-  - [config/data_source.yaml](config/data_source.yaml)
+## Screenshots / Demo
+![Dashboard Preview](assets/images/dashboard-preview.png)
+![Dashboard Insight View](assets/images/Screenshot_2.png)
 
-## Business Problem
-Business teams often rely on spreadsheets and manual analyses, resulting in:
-- Low speed for generating insights
-- Inconsistent analytical quality
-- Low decision traceability
+## Architecture Proof
+- Layered architecture and flow: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- Architecture decisions (ADR): [docs/adr](docs/adr)
+- Data contract (`raw/bronze/silver/gold`): [docs/DATA_CONTRACT.md](docs/DATA_CONTRACT.md)
+- Data provenance: [docs/DATA_PROVENANCE.md](docs/DATA_PROVENANCE.md)
 
-The solution provides a reusable analytics layer where stakeholders upload data and quickly obtain quality diagnostics, patterns, relationships, and trends.
-
-## Data Strategy
-### Data Sources
-- Primary source: real Kaggle dataset (registered in `docs/DATA_PROVENANCE.md`)
-- Input formats: `.csv`, `.xlsx`
-
-### Processing and Analytical Modeling
-- Extraction with encoding handling for robust ingestion
-- Automatic detection of column types (numeric, categorical, date, id)
-- Missing values and outlier diagnostics
-- Descriptive statistics and correlation analysis
-- Hypothesis testing (t-test, ANOVA, chi-square, Pearson, Spearman)
-- Optional SQLite persistence for reproducibility and reuse
-
-## Architecture Overview
-```mermaid
-flowchart TD
-    A[User upload CSV/XLSX] --> B[File Extractor src/data/file_extractor.py]
-    B --> C[Transformer src/data/transformer.py]
-    C --> D[EDA src/analysis/exploratory.py]
-    C --> E[SQLite persistence src/data/sqlite_manager.py]
-    D --> F[Streamlit app dashboard/app.py]
-    E --> F
-    F --> G[Decision support insights]
-```
-
-```mermaid
-flowchart LR
-    subgraph Presentation
-        UI[dashboard/app.py]
-    end
-
-    subgraph Analytical_Domain
-        EX[exploratory.py]
-        TR[transformer.py]
-        FX[file_extractor.py]
-    end
-
-    subgraph Persistence
-        DB[(SQLite)]
-        SM[sqlite_manager.py]
-    end
-
-    UI --> EX
-    UI --> TR
-    UI --> FX
-    UI --> SM
-    SM --> DB
-```
-
-## Detailed Architecture and ADRs
-- Full technical architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- Architecture Decision Records:
-  - [ADR-0001-streamlit-presentation-layer.md](docs/DECISIONS/ADR-0001-streamlit-presentation-layer.md)
-  - [ADR-0002-sqlite-persistence.md](docs/DECISIONS/ADR-0002-sqlite-persistence.md)
-  - [ADR-0003-kaggle-provenance-gate.md](docs/DECISIONS/ADR-0003-kaggle-provenance-gate.md)
-
-## Project Structure
-```text
-.
-|-- .streamlit/
-|   |-- config.toml
-|   `-- secrets.example.toml
-|-- dashboard/
-|   |-- app.py
-|   |-- __init__.py
-|   `-- utils/
-|       |-- analytics.py
-|       `-- __init__.py
-|-- src/
-|   |-- analysis/
-|   |   `-- exploratory.py
-|   `-- data/
-|       |-- file_extractor.py
-|       |-- transformer.py
-|       `-- sqlite_manager.py
-|-- src/utils/
-|   `-- observability.py
-|-- config/
-|   |-- config.yaml
-|   |-- data_source.yaml
-|   `-- settings.py
-|-- scripts/
-|   |-- automation.py
-|   |-- check_encoding.py
-|   |-- generate_sample_data.py
-|   |-- set_kaggle_provenance.py
-|   |-- streamlit_cloud_preflight.py
-|   `-- validate_data_provenance.py
-|-- docs/
-|   |-- ARCHITECTURE.md
-|   |-- DATA_PROVENANCE.md
-|   |-- STREAMLIT_CLOUD.md
-|   `-- DECISIONS/
-|       |-- ADR-0001-streamlit-presentation-layer.md
-|       |-- ADR-0002-sqlite-persistence.md
-|       `-- ADR-0003-kaggle-provenance-gate.md
-|-- data/
-|   `-- sample/default_demo.csv
-|-- tests/
-|-- requirements.txt
-|-- requirements-dev.txt
-|-- runtime.txt
-|-- pyproject.toml
-|-- Makefile
-|-- README.md
-`-- README.en.md
-```
-
-## Tech Stack
-- Language: Python
-- Application framework: Streamlit
-- Data processing: Pandas, NumPy
-- Statistics: SciPy
-- Visualization: Plotly
-- Persistence: SQLite
-- Configuration: YAML + Python settings layer
-
-## Reproducibility (How to Run)
-### Prerequisites
-- Python 3.11+
-- pip
-
-### Local Run
+## Reproducible Run
 ```bash
 git clone https://github.com/samuelmaia-data-analyst/data-senior-analytics.git
 cd data-senior-analytics
-
 python -m venv .venv
 # Linux/macOS
 source .venv/bin/activate
 # Windows PowerShell
 .venv\Scripts\Activate.ps1
 
-pip install --upgrade pip
-pip install -r requirements-dev.txt
-
-# optional: generate synthetic local dataset for demo
-python scripts/generate_sample_data.py
-
-streamlit run dashboard/app.py
+make setup
+make lint
+make test
+make run
 ```
 
-Local URL: http://localhost:8501
+## Environment Variables
+Copy `.env.example` to `.env` and adjust values for your environment.
 
-## Streamlit Cloud Deployment
-### Recommended setup
-- Main file path: `dashboard/app.py`
-- Python runtime: `runtime.txt`
-- Production dependencies: `requirements.txt`
-- Secrets: configure in Streamlit Cloud dashboard based on `.streamlit/secrets.example.toml`
+| Variable | Required | Purpose |
+|---|---|---|
+| `AWS_ACCESS_KEY_ID` | No | Optional AWS integration |
+| `AWS_SECRET_ACCESS_KEY` | No | Optional AWS integration |
+| `AWS_REGION` | No | AWS region (default: `us-east-1`) |
+| `S3_BUCKET_NAME` | No | Bucket used for external persistence |
+| `DATA_PATH` | No | Local data root |
+| `LOG_LEVEL` | No | Application logging level |
 
-### Runbook
-- [docs/STREAMLIT_CLOUD.md](docs/STREAMLIT_CLOUD.md)
+## Quality and Engineering
+- `pytest-cov` with coverage gate (`>=70%`)
+- `ruff` + `black` + optional `mypy` via pre-commit
+- Gold output contract tests under `tests/`
 
-## Executive Quality Standards
-Operational shortcut (`make`):
-```bash
-make quality
-```
-
-Individual checks:
-```bash
-python -m ruff check src config scripts dashboard tests
-python -m pytest
-python scripts/check_encoding.py
-python scripts/streamlit_cloud_preflight.py
-python scripts/validate_data_provenance.py
-```
-
-## Contact
-Samuel Maia
-
-Senior Data Analyst
-
-LinkedIn: https://linkedin.com/in/samuelmaia-data-analyst
-
-GitHub: https://github.com/samuelmaia-data-analyst
-
-Email: smaia2@gmail.com
+## Release Management
+- Changelog: [CHANGELOG.md](CHANGELOG.md)
+- Release notes: see [CHANGELOG.md](CHANGELOG.md).
 
 ## License
-This project is licensed under the MIT License.
+Licensed under MIT. See [LICENSE](LICENSE).

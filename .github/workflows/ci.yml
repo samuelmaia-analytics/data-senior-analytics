@@ -1,4 +1,4 @@
-name: CI
+﻿name: CI
 
 on:
   push:
@@ -26,8 +26,17 @@ jobs:
       - name: Ruff lint
         run: ruff check src config scripts dashboard tests
 
-      - name: Run tests
+      - name: Black format check
+        run: black --check src config scripts dashboard tests
+
+      - name: Run tests with coverage
         run: pytest
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: false
 
       - name: Encoding check
         run: python scripts/check_encoding.py
