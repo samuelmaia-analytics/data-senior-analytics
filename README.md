@@ -27,7 +27,7 @@ Live demo: https://data-analytics-sr.streamlit.app
 
 ## Architecture Proof
 - Layered architecture and flow: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- Architecture decisions (ADR): [docs/adr](docs/adr)
+- Architecture decision record (ADR): [docs/adr/0001-architecture-decision.md](docs/adr/0001-architecture-decision.md)
 - Data contract (`raw/bronze/silver/gold`): [docs/DATA_CONTRACT.md](docs/DATA_CONTRACT.md)
 - Data provenance: [docs/DATA_PROVENANCE.md](docs/DATA_PROVENANCE.md)
 - Data lineage manifest: [docs/DATA_LINEAGE.md](docs/DATA_LINEAGE.md)
