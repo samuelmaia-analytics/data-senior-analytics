@@ -22,10 +22,10 @@ Demo online: https://data-analytics-sr.streamlit.app
 - Resultados: geração de insights mais rápida, com esquema de saída estável para dashboard e stakeholders.
 
 ## Impacto no Negócio
-- Cenário simulado (premissas): 2.400 clientes ativos, churn anual de 18% e receita média anual de R$ 3.200 por cliente.
-- Potencial redução de churn: 2,5 p.p. (de 18,0% para 15,5%), equivalente a 60 clientes retidos por ano.
-- Proteção estimada de receita: R$ 192.000 por ano (60 clientes x R$ 3.200).
-- Melhoria estimada de customer lifetime value (CLV): +9% com retenção segmentada por risco.
+- Fonte real: experimento de classificação de inadimplência com dataset Kaggle (`config/data_source.yaml`), registrado em `data/raw/classifica-o-de-inadimpl-ncia.ipynb`.
+- Melhor modelo no benchmark: **LightGBM** com **AUC 0,86** e **acurácia 78,38%** (conjunto de teste com 5.015 registros).
+- Capacidade de ação: **recall de 76,19%** para a classe inadimplente (1), permitindo identificar cerca de 3 em cada 4 casos de risco.
+- Eficiência operacional: **precisão de 79,68%** na classe inadimplente, reduzindo esforço desperdiçado em abordagens de baixo risco.
 
 ## Descrição do Dataset
 - Fonte:

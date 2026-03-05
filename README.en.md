@@ -22,10 +22,10 @@ Live demo: https://data-analytics-sr.streamlit.app
 - Outcomes: faster insight turnaround with stable output schema for dashboard and stakeholder consumption.
 
 ## Business Impact
-- Simulated scenario (assumptions): 2,400 active customers, 18% annual churn, and BRL 3,200 average annual revenue per customer.
-- Potential churn reduction: 2.5 p.p. (from 18.0% to 15.5%), equivalent to 60 customers retained per year.
-- Estimated revenue protection: BRL 192,000 per year (60 customers x BRL 3,200).
-- Estimated customer lifetime value (CLV) uplift: +9% with risk-segmented retention actions.
+- Real source: credit-default classification benchmark on a Kaggle dataset (`config/data_source.yaml`), tracked in `data/raw/classifica-o-de-inadimpl-ncia.ipynb`.
+- Best model in benchmark: **LightGBM** with **AUC 0.86** and **78.38% accuracy** (test set with 5,015 records).
+- Actionability: **76.19% recall** for the default class (1), enabling detection of roughly 3 out of 4 high-risk cases.
+- Operational efficiency: **79.68% precision** for the default class, reducing wasted effort on low-risk outreach.
 
 ## Dataset Description
 - Source:
