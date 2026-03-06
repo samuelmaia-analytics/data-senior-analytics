@@ -2,9 +2,9 @@
 
 [Versao em Portugues](README.md)
 
-[![CI](https://github.com/samuelmaia-data-analyst/data-senior-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/samuelmaia-data-analyst/data-senior-analytics/actions/workflows/ci.yml)
-[![Coverage](https://codecov.io/gh/samuelmaia-data-analyst/data-senior-analytics/branch/main/graph/badge.svg)](https://codecov.io/gh/samuelmaia-data-analyst/data-senior-analytics)
-[![License](https://img.shields.io/github/license/samuelmaia-data-analyst/data-senior-analytics)](LICENSE)
+[![CI](https://github.com/samuelmaia-analytics/data-senior-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/samuelmaia-analytics/data-senior-analytics/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/samuelmaia-analytics/data-senior-analytics/branch/main/graph/badge.svg)](https://codecov.io/gh/samuelmaia-analytics/data-senior-analytics)
+[![License](https://img.shields.io/github/license/samuelmaia-analytics/data-senior-analytics)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/downloads/)
 
 Business-focused analytics project that turns raw tabular files into decision-ready insights with a reproducible pipeline and interactive dashboard.
@@ -94,7 +94,7 @@ flowchart TD
 
 ## Reproducible Run
 ```bash
-git clone https://github.com/samuelmaia-data-analyst/data-senior-analytics.git
+git clone https://github.com/samuelmaia-analytics/data-senior-analytics.git
 cd data-senior-analytics
 python -m venv .venv
 # Linux/macOS

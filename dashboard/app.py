@@ -595,7 +595,7 @@ def main() -> None:
 
         st.link_button(
             "PT-BR version",
-            "https://github.com/samuelmaia-data-analyst/data-senior-analytics/blob/main/README.md",
+            "https://github.com/samuelmaia-analytics/data-senior-analytics/blob/main/README.md",
             use_container_width=True,
         )
 

@@ -8,7 +8,7 @@
 - Data provenance: `docs/DATA_PROVENANCE.md` and `config/data_source.yaml`
 
 ## 2. Streamlit Cloud App Settings
-- Repository: `samuelmaia-data-analyst/data-senior-analytics`
+- Repository: `samuelmaia-analytics/data-senior-analytics`
 - Branch: `main`
 - Main file path: `dashboard/app.py`
 - Python version: read from `runtime.txt`
