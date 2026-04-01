@@ -2,7 +2,9 @@ import pandas as pd
 
 from dashboard.utils.analytics import (
     build_business_snapshot,
+    build_decision_brief,
     build_data_quality_summary,
+    build_governance_snapshot,
     build_priority_actions,
     detect_column_types,
     get_basic_stats,
@@ -141,7 +143,65 @@ def test_build_business_snapshot_extracts_business_kpis():
     assert snapshot["unique_clients"] == 2
     assert snapshot["top_category"] == "A"
     assert snapshot["top_region"] == "Sul"
+    assert snapshot["top_category_share"] > 50
+    assert snapshot["top_region_share"] > 50
     assert not snapshot["revenue_trend"].empty
+
+
+def test_build_decision_brief_prioritizes_quality_risk_when_dataset_is_weak():
+    quality_summary = {
+        "quality_score": 58.0,
+        "missing_pct": 12.0,
+        "duplicate_pct": 3.5,
+        "status": "Critical",
+    }
+    business_snapshot = {
+        "top_category": "A",
+        "top_category_share": 62.5,
+        "top_region": "Sul",
+        "top_region_share": 58.0,
+        "trend_direction": "Down",
+        "trend_change_pct": -8.2,
+    }
+
+    brief = build_decision_brief(
+        quality_summary=quality_summary,
+        business_snapshot=business_snapshot,
+        priority_actions=["Review missing values before sharing outputs."],
+        analysis={"insights": ["Sales are concentrated in a small set of categories."]},
+    )
+
+    assert brief["decision_risk"] == "High"
+    assert brief["confidence_label"] == "Low"
+    assert (
+        "Governance" in brief["primary_concern"]
+        or "quality risk" in brief["primary_concern"].lower()
+    )
+    assert len(brief["drivers"]) >= 3
+
+
+def test_build_governance_snapshot_exposes_release_and_freshness_signals():
+    df = pd.DataFrame(
+        {
+            "data": pd.to_datetime(["2025-01-01", "2025-01-03"]),
+            "valor_total": [100.0, 150.0],
+        }
+    )
+
+    snapshot = build_governance_snapshot(
+        df=df,
+        quality_summary={"quality_score": 93.0, "status": "Excellent"},
+        transform_log=[{"operation": "clean_column_names"}],
+        data_name="sales.csv",
+        data_source="upload",
+        loaded_at="2026-04-01T10:15:00",
+    )
+
+    assert snapshot["data_source_label"] == "User upload"
+    assert snapshot["trust_label"] == "High"
+    assert snapshot["release_label"] == "Ready for review"
+    assert snapshot["latest_record"].startswith("2025-01-03")
+    assert snapshot["transformation_count"] == 1
 
 
 def test_summarize_correlation_pairs_returns_sorted_pairs():

@@ -21,6 +21,8 @@ if str(ROOT_DIR) not in sys.path:
 from config.settings import Settings  # noqa: E402
 from dashboard.utils.analytics import (  # noqa: E402
     build_business_snapshot,
+    build_decision_brief,
+    build_governance_snapshot,
     summarize_correlation_pairs,
     summarize_transformation_log,
 )
@@ -56,6 +58,18 @@ def apply_dashboard_style() -> None:
     st.markdown(
         """
         <style>
+            :root {
+                --surface: rgba(255, 255, 255, 0.94);
+                --surface-alt: rgba(248, 250, 252, 0.95);
+                --text-main: #0f172a;
+                --text-muted: #475569;
+                --line: #d8dee8;
+                --accent: #0b4e6e;
+                --accent-soft: rgba(11, 78, 110, 0.12);
+                --warn: #b45309;
+                --good: #166534;
+                --danger: #991b1b;
+            }
             html, body, [class*="css"] {
                 font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
             }
@@ -71,36 +85,38 @@ def apply_dashboard_style() -> None:
                 padding-bottom: 2rem;
             }
             .hero {
-                padding: 1rem 1.2rem;
-                border: 1px solid #d8dee8;
-                border-radius: 12px;
-                background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
-                box-shadow: 0 8px 28px rgba(15, 23, 42, 0.08);
-                margin-bottom: 0.8rem;
+                padding: 1.15rem 1.3rem;
+                border: 1px solid var(--line);
+                border-radius: 18px;
+                background:
+                    radial-gradient(circle at top right, rgba(180, 83, 9, 0.10), transparent 22%),
+                    linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+                box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+                margin-bottom: 0.9rem;
             }
             .hero-title {
                 margin: 0;
-                color: #0f172a;
-                font-size: 2rem;
+                color: var(--text-main);
+                font-size: 2.15rem;
                 font-weight: 750;
                 letter-spacing: -0.02em;
             }
             .hero-subtitle {
                 margin: 0.35rem 0 0 0;
-                color: #475569;
+                color: var(--text-muted);
                 font-size: 0.95rem;
             }
             div[data-testid="stMetric"] {
-                background: rgba(255, 255, 255, 0.92);
-                border: 1px solid #d8dee8;
-                border-radius: 12px;
-                padding: 0.45rem 0.7rem;
+                background: var(--surface);
+                border: 1px solid var(--line);
+                border-radius: 14px;
+                padding: 0.5rem 0.75rem;
                 box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
             }
             div[role="radiogroup"] > label {
-                border: 1px solid #d8dee8;
-                border-radius: 10px;
-                padding: 0.18rem 0.55rem;
+                border: 1px solid var(--line);
+                border-radius: 12px;
+                padding: 0.22rem 0.6rem;
                 background: #ffffff;
                 margin-right: 0.2rem;
             }
@@ -109,7 +125,7 @@ def apply_dashboard_style() -> None:
                 padding: 0.2rem 0.55rem;
                 border-radius: 999px;
                 border: 1px solid #cbd5e1;
-                color: #0f172a;
+                color: var(--text-main);
                 font-size: 0.78rem;
                 background: #f8fafc;
                 margin-bottom: 0.4rem;
@@ -117,7 +133,7 @@ def apply_dashboard_style() -> None:
             .exec-card-title {
                 font-size: 1.05rem;
                 font-weight: 700;
-                color: #0f172a;
+                color: var(--text-main);
                 margin-bottom: 0.35rem;
             }
             .exec-chip-row {
@@ -146,7 +162,7 @@ def apply_dashboard_style() -> None:
             }
             .board-kicker {
                 margin: 0 0 0.45rem 0;
-                color: #0b4e6e;
+                color: var(--accent);
                 font-size: 0.75rem;
                 font-weight: 700;
                 text-transform: uppercase;
@@ -154,15 +170,79 @@ def apply_dashboard_style() -> None:
             }
             .board-title {
                 margin: 0 0 0.45rem 0;
-                color: #0f172a;
+                color: var(--text-main);
                 font-size: 1.1rem;
                 font-weight: 760;
             }
             .board-copy {
                 margin: 0;
-                color: #475569;
+                color: var(--text-muted);
                 font-size: 0.92rem;
                 line-height: 1.45;
+            }
+            .signal-card {
+                padding: 1rem 1.05rem;
+                border-radius: 18px;
+                border: 1px solid var(--line);
+                background: linear-gradient(180deg, var(--surface) 0%, var(--surface-alt) 100%);
+                box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+                min-height: 180px;
+            }
+            .signal-kicker {
+                margin: 0 0 0.5rem 0;
+                color: var(--accent);
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                font-size: 0.72rem;
+                font-weight: 700;
+            }
+            .signal-title {
+                margin: 0 0 0.55rem 0;
+                color: var(--text-main);
+                font-size: 1.22rem;
+                font-weight: 760;
+            }
+            .signal-copy {
+                margin: 0;
+                color: var(--text-muted);
+                line-height: 1.5;
+                font-size: 0.94rem;
+            }
+            .status-strip {
+                display: grid;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 0.75rem;
+                margin: 0.25rem 0 1rem 0;
+            }
+            .status-card {
+                padding: 0.9rem 1rem;
+                border-radius: 16px;
+                border: 1px solid var(--line);
+                background: rgba(255, 255, 255, 0.94);
+            }
+            .status-label {
+                margin: 0 0 0.35rem 0;
+                color: var(--text-muted);
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                font-weight: 700;
+            }
+            .status-value {
+                margin: 0;
+                color: var(--text-main);
+                font-size: 1.15rem;
+                font-weight: 760;
+            }
+            .status-caption {
+                margin: 0.3rem 0 0 0;
+                color: var(--text-muted);
+                font-size: 0.86rem;
+            }
+            @media (max-width: 960px) {
+                .status-strip {
+                    grid-template-columns: 1fr 1fr;
+                }
             }
         </style>
         """,
@@ -238,6 +318,7 @@ def apply_dataset_to_session(df: pd.DataFrame, data_name: str, data_source: str)
     st.session_state.data = artifacts.curated_df
     st.session_state.data_name = data_name
     st.session_state.data_source = data_source
+    st.session_state.loaded_at = datetime.now().isoformat(timespec="seconds")
     st.session_state.analysis = artifacts.analysis
     st.session_state.transform_log = artifacts.transform_log
     st.session_state.quality_summary = artifacts.quality_summary
@@ -251,6 +332,7 @@ def clear_dataset_state() -> None:
         "data",
         "data_name",
         "data_source",
+        "loaded_at",
         "analysis",
         "transform_log",
         "quality_summary",
@@ -267,6 +349,7 @@ def ensure_session_defaults() -> None:
         "data": None,
         "data_name": None,
         "data_source": None,
+        "loaded_at": None,
         "analysis": None,
         "transform_log": [],
         "quality_summary": None,
@@ -312,10 +395,10 @@ def render_header(df: pd.DataFrame | None, quality_summary: dict[str, Any] | Non
     st.markdown(
         """
         <div class="exec-chip-row">
-            <span class="exec-chip">Business-ready analytics</span>
-            <span class="exec-chip">Automated curation pipeline</span>
-            <span class="exec-chip">Data governance by design</span>
-            <span class="exec-chip">Decision-ready reporting</span>
+            <span class="exec-chip">Decision workflow</span>
+            <span class="exec-chip">Curated ingestion</span>
+            <span class="exec-chip">Trust signals</span>
+            <span class="exec-chip">Operational persistence</span>
         </div>
         """,
         unsafe_allow_html=True,
@@ -329,8 +412,15 @@ def render_home(
     analysis: dict[str, Any] | None,
     priority_actions: list[str],
     business_snapshot: dict[str, Any] | None,
+    governance_snapshot: dict[str, Any],
 ) -> None:
     st.subheader("Summary")
+    decision_brief = build_decision_brief(
+        quality_summary=quality_summary,
+        business_snapshot=business_snapshot,
+        priority_actions=priority_actions,
+        analysis=analysis,
+    )
 
     c1, c2, c3, c4 = st.columns(4)
     with c1:
@@ -357,42 +447,71 @@ def render_home(
         with k4:
             st.metric("Items sold", format_compact_number(business_snapshot["items_sold"]))
 
-    left, right = st.columns(2)
+    st.markdown(
+        f"""
+        <div class="status-strip">
+            <div class="status-card">
+                <p class="status-label">Decision Risk</p>
+                <p class="status-value">{decision_brief['decision_risk']}</p>
+                <p class="status-caption">Current release posture for business-facing use.</p>
+            </div>
+            <div class="status-card">
+                <p class="status-label">Confidence</p>
+                <p class="status-value">{decision_brief['confidence_label']}</p>
+                <p class="status-caption">Trust level based on quality gates and data coverage.</p>
+            </div>
+            <div class="status-card">
+                <p class="status-label">Release</p>
+                <p class="status-value">{governance_snapshot['release_label']}</p>
+                <p class="status-caption">Operational recommendation for sharing or persistence.</p>
+            </div>
+            <div class="status-card">
+                <p class="status-label">Source</p>
+                <p class="status-value">{governance_snapshot['data_source_label']}</p>
+                <p class="status-caption">{governance_snapshot['data_name']}</p>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    left, right = st.columns([1.2, 1])
     with left:
-        with st.container(border=True):
-            st.markdown('<span class="exec-pill">Direction</span>', unsafe_allow_html=True)
-            st.markdown('<div class="exec-card-title">Objective</div>', unsafe_allow_html=True)
-            st.write("Turn tabular data into actionable insights with governed, curated outputs.")
-            st.markdown('<div class="exec-card-title">Value</div>', unsafe_allow_html=True)
-            st.write(
-                "Upload raw files, standardize them automatically, and expose decision-ready metrics."
-            )
+        st.markdown(
+            f"""
+            <div class="signal-card">
+                <p class="signal-kicker">Leadership view</p>
+                <h3 class="signal-title">{decision_brief['headline']}</h3>
+                <p class="signal-copy">{decision_brief['primary_concern']}</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     with right:
         with st.container(border=True):
-            st.markdown('<span class="exec-pill">Data context</span>', unsafe_allow_html=True)
-            st.markdown('<div class="exec-card-title">Data Status</div>', unsafe_allow_html=True)
-            if df is not None and not df.empty and quality_summary:
-                st.write(f"Dataset: **{st.session_state.data_name}**")
-                st.write(f"Curated rows: **{quality_summary['rows']:,}**")
-                st.write(f"Columns: **{quality_summary['columns']}**")
-                st.write(f"Completeness: **{quality_summary['completeness_pct']:.2f}%**")
-            else:
-                st.info("No dataset loaded.")
+            st.markdown('<span class="exec-pill">Governance</span>', unsafe_allow_html=True)
+            st.markdown(
+                '<div class="exec-card-title">Trust and recency</div>', unsafe_allow_html=True
+            )
+            st.write(f"Trust label: **{governance_snapshot['trust_label']}**")
+            st.write(f"Loaded at: **{governance_snapshot['loaded_at'] or 'Unavailable'}**")
+            st.write(f"Latest record: **{governance_snapshot['latest_record'] or 'Unavailable'}**")
+            st.write(f"Transformations logged: **{governance_snapshot['transformation_count']}**")
 
     s1, s2, s3 = st.columns(3)
     if df is not None and not df.empty and quality_summary:
         insight_msg = (
-            f"Curated dataset with {quality_summary['numeric_columns']} numeric columns and "
-            f"quality score {quality_summary['quality_score']:.0f}/100."
+            decision_brief["drivers"][0]
+            if decision_brief["drivers"]
+            else (f"Curated dataset with {quality_summary['numeric_columns']} numeric columns.")
         )
         risk_msg = (
-            f"Missing: {quality_summary['missing_pct']:.2f}% | "
-            f"Duplicates: {quality_summary['duplicate_pct']:.2f}%."
+            f"Quality score {quality_summary['quality_score']:.0f}/100 | "
+            f"Missing {quality_summary['missing_pct']:.2f}% | "
+            f"Duplicates {quality_summary['duplicate_pct']:.2f}%."
         )
-        action_msg = (
-            priority_actions[0] if priority_actions else "Persist curated outputs in SQLite."
-        )
+        action_msg = decision_brief["recommended_action"]
     else:
         insight_msg = "No active dataset to generate decision-ready insights."
         risk_msg = "Risk cannot be estimated without loaded data."
@@ -411,6 +530,11 @@ def render_home(
             st.markdown('<span class="exec-pill">Action</span>', unsafe_allow_html=True)
             st.write(action_msg)
 
+    if decision_brief["drivers"]:
+        st.markdown("### Decision Drivers")
+        for driver in decision_brief["drivers"]:
+            st.write(f"- {driver}")
+
     if business_snapshot:
         st.markdown("### Business Briefing")
         b1, b2, b3 = st.columns(3)
@@ -421,8 +545,9 @@ def render_home(
                     <p class="board-kicker">Commercial Focus</p>
                     <h3 class="board-title">Top category: {business_snapshot['top_category'] or 'N/A'}</h3>
                     <p class="board-copy">
-                        Revenue concentration is currently led by the strongest category. Use this signal to prioritize portfolio
-                        defense, pricing actions, and cross-sell strategy.
+                        Revenue concentration is led by the strongest category at
+                        {business_snapshot['top_category_share'] or 0:.1f}% of revenue.
+                        Use this signal to prioritize pricing, portfolio defense, and cross-sell actions.
                     </p>
                 </div>
                 """,
@@ -435,8 +560,9 @@ def render_home(
                     <p class="board-kicker">Regional Signal</p>
                     <h3 class="board-title">Top region: {business_snapshot['top_region'] or 'N/A'}</h3>
                     <p class="board-copy">
-                        Regional mix identifies where commercial momentum is strongest and where leadership should inspect execution
-                        variance, service quality, or distribution gaps.
+                        Regional mix shows the largest revenue share at
+                        {business_snapshot['top_region_share'] or 0:.1f}%.
+                        This helps focus field execution, service quality review, and distribution gaps.
                     </p>
                 </div>
                 """,
@@ -446,11 +572,12 @@ def render_home(
             st.markdown(
                 f"""
                 <div class="board-card">
-                    <p class="board-kicker">Governance Readiness</p>
-                    <h3 class="board-title">{quality_summary['status'] if quality_summary else 'No data'}</h3>
+                    <p class="board-kicker">Momentum</p>
+                    <h3 class="board-title">{business_snapshot['trend_direction']}</h3>
                     <p class="board-copy">
-                        The current quality score is {quality_summary['quality_score']:.0f}/100.
-                        This is the release signal for whether the dataset is ready for business consumption.
+                        Latest visible period change:
+                        {business_snapshot['trend_change_pct'] if business_snapshot['trend_change_pct'] is not None else 0:.1f}%.
+                        This is the fastest indicator for whether commercial momentum is improving or softening.
                     </p>
                 </div>
                 """,
@@ -493,7 +620,7 @@ def render_home(
             st.write(f"- {insight}")
 
     if business_snapshot and not business_snapshot["revenue_by_category"].empty:
-        chart_left, chart_right = st.columns([1.3, 1])
+        chart_left, chart_right = st.columns([1.1, 1])
         category_revenue = business_snapshot["revenue_by_category"].head(10)
         fig = px.bar(
             category_revenue,
@@ -502,25 +629,52 @@ def render_home(
             orientation="h",
             title="Top Categories by Revenue",
             labels={"categoria": "product_category", "valor_total": "revenue"},
+            text="share_pct",
+            color="share_pct",
+            color_continuous_scale=["#dbeafe", "#0b4e6e"],
         )
-        fig.update_layout(yaxis={"categoryorder": "total ascending"})
+        fig.update_layout(yaxis={"categoryorder": "total ascending"}, coloraxis_showscale=False)
+        fig.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
         with chart_left:
             st.plotly_chart(fig, width="stretch")
 
         with chart_right:
-            trend_df = business_snapshot["revenue_trend"]
-            if isinstance(trend_df, pd.DataFrame) and not trend_df.empty:
-                trend_fig = px.line(
-                    trend_df,
-                    x="data",
-                    y="valor_total",
-                    markers=True,
-                    title="Revenue Trend",
-                    labels={"data": "date", "valor_total": "revenue"},
+            region_df = business_snapshot["revenue_by_region"]
+            if isinstance(region_df, pd.DataFrame) and not region_df.empty:
+                region_fig = px.pie(
+                    region_df.head(6),
+                    names="regiao",
+                    values="valor_total",
+                    title="Revenue Mix by Region",
+                    hole=0.58,
+                    color_discrete_sequence=[
+                        "#0b4e6e",
+                        "#1d6f91",
+                        "#3b92b5",
+                        "#8bbfd3",
+                        "#c7e3ef",
+                        "#d97706",
+                    ],
                 )
-                st.plotly_chart(trend_fig, width="stretch")
+                region_fig.update_traces(textinfo="label+percent")
+                st.plotly_chart(region_fig, width="stretch")
             else:
-                st.info("Revenue trend is not available for the current dataset.")
+                st.info("Regional mix is not available for the current dataset.")
+
+        trend_df = business_snapshot["revenue_trend"]
+        if isinstance(trend_df, pd.DataFrame) and not trend_df.empty:
+            trend_fig = px.area(
+                trend_df,
+                x="data",
+                y="valor_total",
+                title="Revenue Trend",
+                labels={"data": "date", "valor_total": "revenue"},
+                color_discrete_sequence=["#0b4e6e"],
+            )
+            trend_fig.update_traces(mode="lines+markers", line={"width": 3}, opacity=0.78)
+            st.plotly_chart(trend_fig, width="stretch")
+        else:
+            st.info("Revenue trend is not available for the current dataset.")
 
 
 def render_upload(db: SQLiteManager, quality_summary: dict[str, Any] | None) -> None:
@@ -749,7 +903,13 @@ def render_charts(df: pd.DataFrame | None) -> None:
     with tabs[0]:
         if numeric_cols:
             col = st.selectbox("Numeric variable", numeric_cols, key="chart_numeric_variable")
-            fig = px.histogram(df, x=col, nbins=30, title=f"Distribution: {col}")
+            fig = px.histogram(
+                df,
+                x=col,
+                nbins=30,
+                title=f"Distribution: {col}",
+                color_discrete_sequence=["#0b4e6e"],
+            )
             st.plotly_chart(fig, width="stretch")
         else:
             st.info("No numeric columns available.")
@@ -772,7 +932,15 @@ def render_charts(df: pd.DataFrame | None) -> None:
                 .reset_index()
                 .sort_values(val, ascending=False)
             )
-            fig = px.bar(grouped.head(15), x=cat, y=val, title=f"Average {val} by {cat}")
+            fig = px.bar(
+                grouped.head(15),
+                x=cat,
+                y=val,
+                title=f"Average {val} by {cat}",
+                color=val,
+                color_continuous_scale=["#dbeafe", "#0b4e6e"],
+            )
+            fig.update_layout(coloraxis_showscale=False)
             st.plotly_chart(fig, width="stretch")
         else:
             st.info("Category and numeric columns are required.")
@@ -793,6 +961,7 @@ def render_charts(df: pd.DataFrame | None) -> None:
                 y="valor_total",
                 title="Revenue over time",
                 labels={"data": "date", "valor_total": "revenue"},
+                color_discrete_sequence=["#0b4e6e"],
             )
             st.plotly_chart(trend_fig, width="stretch")
         else:
@@ -821,6 +990,14 @@ def render_settings(
     transform_log: list[dict[str, Any]],
 ) -> None:
     st.subheader("Settings and Runtime")
+    governance_snapshot = build_governance_snapshot(
+        df=df,
+        quality_summary=quality_summary,
+        transform_log=transform_log,
+        data_name=st.session_state.data_name,
+        data_source=st.session_state.data_source,
+        loaded_at=st.session_state.loaded_at,
+    )
     st.json(
         {
             "timestamp": datetime.now().isoformat(timespec="seconds"),
@@ -829,6 +1006,7 @@ def render_settings(
             "rows": int(df.shape[0]) if df is not None else 0,
             "columns": int(df.shape[1]) if df is not None else 0,
             "quality_summary": quality_summary,
+            "governance_snapshot": governance_snapshot,
             "sqlite_path": str(Settings.SQLITE_PATH),
             "transformations": len(transform_log),
         }
@@ -852,6 +1030,14 @@ def main() -> None:
     quality_summary = st.session_state.quality_summary
     priority_actions = st.session_state.priority_actions
     business_snapshot = st.session_state.business_snapshot
+    governance_snapshot = build_governance_snapshot(
+        df=df,
+        quality_summary=quality_summary,
+        transform_log=transform_log,
+        data_name=st.session_state.data_name,
+        data_source=st.session_state.data_source,
+        loaded_at=st.session_state.loaded_at,
+    )
 
     APP_LOGGER.info(
         "app_start",
@@ -887,6 +1073,8 @@ def main() -> None:
             if quality_summary:
                 st.caption(f"Quality score: **{quality_summary['quality_score']:.0f}/100**")
                 st.caption(f"Status: **{quality_summary['status']}**")
+            st.caption(f"Release: **{governance_snapshot['release_label']}**")
+            st.caption(f"Trust: **{governance_snapshot['trust_label']}**")
             if st.session_state.data_source == "sample_auto":
                 st.info("Default demo dataset loaded automatically.")
 
@@ -902,7 +1090,13 @@ def main() -> None:
 
     page_handlers = {
         "Overview": lambda: render_home(
-            df, db, quality_summary, analysis, priority_actions, business_snapshot
+            df,
+            db,
+            quality_summary,
+            analysis,
+            priority_actions,
+            business_snapshot,
+            governance_snapshot,
         ),
         "Upload": lambda: render_upload(db, quality_summary),
         "Data": lambda: render_data_preview(df, raw_df, transform_log),

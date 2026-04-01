@@ -16,6 +16,11 @@ This folder consolidates the technical, operational, and governance narrative be
 - [DATA_PROVENANCE.md](DATA_PROVENANCE.md): source governance, traceability, and release requirements.
 - [DATA_LINEAGE.md](DATA_LINEAGE.md): reproducibility strategy and manifest-based lineage tracking.
 
+## What Changed in the Current Product Surface
+- The dashboard now exposes a decision brief, trust level, and release posture in `Overview`.
+- Governance is visible in the UI through freshness, source, transformation count, and quality status.
+- The analytics layer now produces both business concentration signals and operational confidence signals.
+
 ## ADRs
 - [ADR-0001-streamlit-presentation-layer.md](adr/ADR-0001-streamlit-presentation-layer.md)
 - [ADR-0002-sqlite-persistence.md](adr/ADR-0002-sqlite-persistence.md)

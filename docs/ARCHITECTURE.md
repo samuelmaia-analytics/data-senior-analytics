@@ -1,17 +1,18 @@
 # Architecture
 
 ## Summary
-The project uses a layered analytics architecture to turn raw tabular inputs into curated, decision-ready outputs. The Streamlit dashboard is the product surface, but the design intentionally separates curation, profiling, business scoring, persistence, and operational controls.
+The project uses a layered analytics architecture to turn raw tabular inputs into curated, decision-ready outputs. The Streamlit dashboard is the product surface, but the design intentionally separates curation, profiling, business scoring, governance signaling, persistence, and operational controls.
 
 ## Architectural Intent
 - Preserve a clean boundary between UI concerns and analytical workflow orchestration.
 - Convert data quality into explicit release and decision signals.
 - Keep curation reusable outside the dashboard.
 - Make deployment and governance first-class parts of the system.
+- Expose decision risk, confidence, and release posture directly in the UI.
 
 ## Layers
 - Presentation layer: `dashboard/app.py` renders the interface, KPI surfaces, EDA tabs, and persistence actions.
-- Dashboard analytics layer: `dashboard/utils/analytics.py` translates profiling into quality score, priority actions, business snapshot, and correlation summaries.
+- Dashboard analytics layer: `dashboard/utils/analytics.py` translates profiling into quality score, priority actions, business snapshot, governance snapshot, decision brief, and correlation summaries.
 - Application service layer: `src/app/curation_service.py` orchestrates curation, profiling, scoring, and business metadata generation.
 - Domain analytics layer: `src/analysis/exploratory.py` generates descriptive statistics and automated insights.
 - Data curation layer: `src/data/transformer.py` standardizes column names, infers types, handles missing values, and removes duplicates.
@@ -48,20 +49,20 @@ sequenceDiagram
     TR-->>AP: Curated DataFrame + transformation log
     AP->>AN: Produce statistics and automated insights
     AN-->>AP: Analytical profile
-    AP->>AU: Build quality summary and business snapshot
-    AU-->>UI: KPI, quality score, priority actions
+    AP->>AU: Build quality summary, business snapshot, and governance signals
+    AU-->>UI: KPI, decision brief, release posture, priority actions
     UI->>DB: Persist curated dataset (optional)
     DB-->>UI: Queryable analytical tables
 ```
 
 ## Dashboard Operating Model
-- `Overview`: KPI, quality status, business briefing, commercial concentration, and trend view.
+- `Overview`: KPI, decision brief, confidence level, release posture, commercial concentration, and trend view.
 - `Upload`: raw-to-curated transition with immediate quality feedback.
 - `Data`: raw vs. curated inspection, column profile, and transformation log.
 - `EDA`: automated insights, descriptive statistics, missing profile, and strongest correlations.
 - `Visualizations`: distribution analysis, business mix, and time trend exploration.
 - `Database`: operational confirmation of persisted curated data.
-- `Settings`: runtime metadata, quality metadata, and transformation count.
+- `Settings`: runtime metadata, governance metadata, quality metadata, and transformation count.
 
 ## Engineering Controls
 - CI gate: lint, format, tests, and coverage (`>=70%`).

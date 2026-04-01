@@ -7,7 +7,7 @@
 [![Streamlit](https://img.shields.io/badge/Streamlit-Live_App-FF4B4B?logo=streamlit&logoColor=white)](https://data-analytics-sr.streamlit.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-0f172a.svg)](LICENSE)
 
-Projeto de analytics que transforma arquivos tabulares em um fluxo curado, rastreável e pronto para tomada de decisão, com dashboard Streamlit, persistência em SQLite e governança de deploy.
+Projeto de analytics que transforma arquivos tabulares em um fluxo curado, rastreável e pronto para tomada de decisão, com dashboard Streamlit, persistência em SQLite, sinais explícitos de confiança e governança de deploy.
 
 Demo online: https://data-analytics-sr.streamlit.app
 
@@ -22,6 +22,13 @@ Este repositório resolve isso com uma abordagem em camadas:
 - persistência do dataset curado em SQLite
 - disciplina de engenharia com lint, testes, cobertura, preflight de deploy e rastreabilidade
 
+## Caso de uso
+O dashboard foi desenhado para cenários em que liderança precisa responder rapidamente:
+- a base está confiável o suficiente para compartilhar ou persistir?
+- onde está a maior concentração comercial?
+- há sinais de perda de momento ou risco de leitura incorreta?
+- qual é a próxima ação recomendada antes de seguir?
+
 ## Sinais de Maturidade
 - Traduz risco técnico em linguagem de negócio: `Quality Score`, `Completeness`, `Priority actions`.
 - Trata Streamlit como camada de produto e operação, não como notebook com widgets.
@@ -31,19 +38,19 @@ Este repositório resolve isso com uma abordagem em camadas:
 - Usa testes e gates de CI para proteger comportamento e contratos de saída.
 
 ## O que o dashboard entrega
-- `Overview`: resumo com KPI comerciais, top category, top region, trend de receita e status de qualidade.
+- `Overview`: memo de decisão com KPI, risco atual, confiança, release posture, concentração comercial e trend de receita.
 - `Upload`: ingestão com curadoria automática e score de qualidade imediatamente após a carga.
 - `Data`: visão lado a lado de bruto vs. curado, perfil de colunas e log do pipeline aplicado.
 - `EDA`: insights automatizados, estatísticas, correlação e perfil de valores ausentes.
-- `Visualizations`: distribuição, mistura de negócio e análise de tendência.
+- `Visualizations`: distribuição, mistura de negócio e análise de tendência com leitura menos genérica.
 - `Database`: verificação operacional do dataset persistido no SQLite.
-- `Settings`: metadados de runtime, qualidade e transformações aplicadas.
+- `Settings`: metadados de runtime, qualidade, governança e transformações aplicadas.
 
 ## Fluxo ponta a ponta
 1. O usuário carrega um CSV/XLSX ou usa um dataset demo.
 2. O app aplica `DataTransformer` para gerar uma versão curada.
 3. `ExploratoryAnalyzer` produz estatísticas e insights automatizados.
-4. `dashboard/utils/analytics.py` converte esse profiling em uma narrativa orientada à decisão.
+4. `dashboard/utils/analytics.py` converte esse profiling em briefing, governança, concentração e narrativa orientada à decisão.
 5. O usuário pode persistir a saída curada em SQLite.
 
 ## Decisões de Arquitetura
@@ -100,6 +107,7 @@ python -m streamlit run dashboard/app.py
 - Preflight para Streamlit Cloud.
 - Checks de encoding, proveniência e manifesto de dados.
 - Runtime de deploy alinhado em `Python 3.11`.
+- Smoke test do dashboard como superfície de produto.
 
 ## Estrutura do repositório
 - `dashboard/`: interface Streamlit e composição da experiência do usuário
