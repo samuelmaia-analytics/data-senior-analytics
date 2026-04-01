@@ -745,7 +745,7 @@ def main() -> None:
         st.link_button(
             "PT-BR version",
             "https://github.com/samuelmaia-analytics/data-senior-analytics/blob/main/README.md",
-            width="stretch",
+            use_container_width=True,
         )
 
         if st.button("Reset session", width="stretch"):
