@@ -7,46 +7,46 @@
 [![License](https://img.shields.io/github/license/samuelmaia-analytics/data-senior-analytics)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11-3776AB?logo=python&logoColor=white)](https://www.python.org/downloads/)
 
-Projeto de analytics desenhado como portfolio de engenharia senior: um dashboard Streamlit que nao apenas mostra graficos, mas orquestra curadoria automatica, profiling, sinais executivos, persistencia SQLite e governanca de deploy.
+Projeto de analytics desenhado como portfólio de engenharia sênior: um dashboard Streamlit que não apenas mostra gráficos, mas orquestra curadoria automática, profiling, sinais executivos, persistência em SQLite e governança de deploy.
 
 Demo online: https://data-analytics-sr.streamlit.app
 
 ## Tese do Projeto
-O problema nao e apenas visualizar dados. O problema real e transformar arquivos tabulares heterogeneos em uma experiencia confiavel para decisao, com qualidade explicita, trilha de transformacao e operacao reproduzivel.
+O problema não é apenas visualizar dados. O problema real é transformar arquivos tabulares heterogêneos em uma experiência confiável para decisão, com qualidade explícita, trilha de transformação e operação reproduzível.
 
-Este repositorio resolve isso com uma abordagem em camadas:
+Este repositório resolve isso com uma abordagem em camadas:
 - entrada bruta via CSV/XLSX ou datasets demo
-- curadoria automatica com padronizacao, inferencia de tipos, tratamento de nulos e deduplicacao
-- politica versionada de scoring e acoes em `config/dashboard_policy.json`
-- leitura executiva com KPI, qualidade da base, tendencias e acoes prioritarias
-- persistencia do dataset curado em SQLite
+- curadoria automática com padronização, inferência de tipos, tratamento de nulos e deduplicação
+- política versionada de scoring e ações em `config/dashboard_policy.json`
+- leitura executiva com KPI, qualidade da base, tendências e ações prioritárias
+- persistência do dataset curado em SQLite
 - disciplina de engenharia com lint, testes, cobertura, preflight de deploy e rastreabilidade
 
 ## Por que este projeto sinaliza senioridade
-- Traduz risco tecnico em linguagem de negocio: `Quality Score`, `Completeness`, `Priority actions`.
-- Trata Streamlit como camada de produto e operacao, nao como notebook com widgets.
+- Traduz risco técnico em linguagem de negócio: `Quality Score`, `Completeness`, `Priority actions`.
+- Trata Streamlit como camada de produto e operação, não como notebook com widgets.
 - Separa responsabilidades entre `dashboard/`, `src/analysis/`, `src/data/` e `config/`.
-- Extrai a curadoria para um servico reutilizavel em `src/app/curation_service.py`.
-- Mantem deploy reproduzivel em Streamlit Cloud com runbook e troubleshooting documentado.
-- Usa testes e gates de CI para proteger comportamento e contratos de saida.
+- Extrai a curadoria para um serviço reutilizável em `src/app/curation_service.py`.
+- Mantém deploy reproduzível em Streamlit Cloud com runbook e troubleshooting documentado.
+- Usa testes e gates de CI para proteger comportamento e contratos de saída.
 
 ## O que o dashboard entrega
 - `Overview`: briefing executivo com KPI comerciais, top category, top region, trend de receita e status de qualidade.
-- `Upload`: ingestao com curadoria automatica e score de qualidade imediatamente apos a carga.
-- `Data`: visao lado a lado de bruto vs curado, perfil de colunas e log do pipeline aplicado.
-- `EDA`: insights automatizados, estatisticas, correlacao e missing profile.
-- `Visualizations`: distribuicao, business mix e trend analysis.
-- `Database`: verificacao operacional do dataset persistido no SQLite.
-- `Settings`: metadata de runtime, qualidade e transformacoes aplicadas.
+- `Upload`: ingestão com curadoria automática e score de qualidade imediatamente após a carga.
+- `Data`: visão lado a lado de bruto vs. curado, perfil de colunas e log do pipeline aplicado.
+- `EDA`: insights automatizados, estatísticas, correlação e perfil de valores ausentes.
+- `Visualizations`: distribuição, mistura de negócio e análise de tendência.
+- `Database`: verificação operacional do dataset persistido no SQLite.
+- `Settings`: metadados de runtime, qualidade e transformações aplicadas.
 
 ## Fluxo ponta a ponta
-1. O usuario carrega um CSV/XLSX ou usa um dataset demo.
-2. O app aplica `DataTransformer` para gerar uma versao curada.
-3. `ExploratoryAnalyzer` produz estatisticas e insights automatizados.
+1. O usuário carrega um CSV/XLSX ou usa um dataset demo.
+2. O app aplica `DataTransformer` para gerar uma versão curada.
+3. `ExploratoryAnalyzer` produz estatísticas e insights automatizados.
 4. `dashboard/utils/analytics.py` converte esse profiling em uma narrativa executiva.
-5. O usuario pode persistir a saida curada em SQLite.
+5. O usuário pode persistir a saída curada em SQLite.
 
-## Decisoes de Arquitetura
+## Decisões de Arquitetura
 ```mermaid
 flowchart LR
     A[CSV / XLSX / Demo data] --> B[Streamlit Upload]
@@ -59,7 +59,7 @@ flowchart LR
     F --> I[Executive Dashboard]
 ```
 
-Documentacao relacionada:
+Documentação relacionada:
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - [docs/STREAMLIT_CLOUD.md](docs/STREAMLIT_CLOUD.md)
 - [docs/DATA_CONTRACT.md](docs/DATA_CONTRACT.md)
@@ -72,13 +72,13 @@ Documentacao relacionada:
 ![Dashboard Walkthrough](assets/images/dashboard-walkthrough.gif)
 
 ## Stack
-- `streamlit` para experiencia executiva
-- `pandas` e `numpy` para transformacao e profiling
-- `plotly` para visualizacao analitica
-- `sqlite3` via `SQLiteManager` para persistencia
+- `streamlit` para experiência executiva
+- `pandas` e `numpy` para transformação e profiling
+- `plotly` para visualização analítica
+- `sqlite3` via `SQLiteManager` para persistência
 - `ruff`, `black`, `pytest` e `pytest-cov` para disciplina de engenharia
 
-## Execucao local
+## Execução local
 ```bash
 git clone https://github.com/samuelmaia-analytics/data-senior-analytics.git
 cd data-senior-analytics
@@ -94,20 +94,20 @@ pip install -r requirements-dev.txt
 python -m streamlit run dashboard/app.py
 ```
 
-## Qualidade e Operacao
-- CI com lint, format, testes e coverage.
+## Qualidade e Operação
+- CI com lint, formatação, testes e coverage.
 - Gate de cobertura em `>=70%`.
 - Preflight para Streamlit Cloud.
-- Checks de encoding, proveniencia e manifest de dados.
+- Checks de encoding, proveniência e manifesto de dados.
 - Runtime de deploy alinhado em `Python 3.11`.
 
-## Estrutura do repositorio
-- `dashboard/`: interface Streamlit e utilitarios executivos
-- `src/analysis/`: analise exploratoria automatizada
-- `src/data/`: curadoria, ingestao e persistencia
-- `config/`: paths e metadados de execucao
-- `docs/`: arquitetura, deploy e governanca
-- `tests/`: protecao automatizada de comportamento
+## Estrutura do repositório
+- `dashboard/`: interface Streamlit e utilitários executivos
+- `src/analysis/`: análise exploratória automatizada
+- `src/data/`: curadoria, ingestão e persistência
+- `config/`: paths e metadados de execução
+- `docs/`: arquitetura, deploy e governança
+- `tests/`: proteção automatizada de comportamento
 
-## Licenca
+## Licença
 Licenciado sob MIT. Veja [LICENSE](LICENSE).
