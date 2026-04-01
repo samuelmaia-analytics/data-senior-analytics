@@ -198,6 +198,65 @@ class SQLiteManager:
             LIMIT 200
             """)
 
+    def get_expiring_datasets(self, within_days: int = 7) -> pd.DataFrame:
+        return self.sql_to_df(
+            """
+            SELECT
+                table_name,
+                retention_until,
+                privacy_risk_level,
+                contains_personal_data,
+                persistence_mode
+            FROM dataset_registry
+            WHERE retention_until IS NOT NULL
+              AND datetime(retention_until) <= datetime('now', ?)
+            ORDER BY retention_until ASC
+            """,
+            params=(f"+{within_days} days",),
+        )
+
+    def purge_expired_datasets(self) -> int:
+        conn = self.connect()
+        if not conn:
+            return 0
+
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT table_name
+                FROM dataset_registry
+                WHERE retention_until IS NOT NULL
+                  AND datetime(retention_until) <= datetime('now')
+                """)
+            expired_tables = [row[0] for row in cursor.fetchall()]
+            purged = 0
+
+            for table_name in expired_tables:
+                cursor.execute(f'DROP TABLE IF EXISTS "{table_name}"')
+                event_at = datetime.now().isoformat(timespec="seconds")
+                cursor.execute(
+                    """
+                    INSERT INTO dataset_audit_log (event_at, table_name, action, metadata_json)
+                    VALUES (?, ?, ?, ?)
+                    """,
+                    (
+                        event_at,
+                        table_name,
+                        "purge_expired_dataset",
+                        json.dumps({"reason": "retention_expired"}, ensure_ascii=False),
+                    ),
+                )
+                cursor.execute("DELETE FROM dataset_registry WHERE table_name = ?", (table_name,))
+                purged += 1
+
+            conn.commit()
+            return purged
+        except Exception as exc:  # noqa: BLE001
+            logger.error(f"Erro ao expurgar datasets expirados: {exc}")
+            return 0
+        finally:
+            self.disconnect()
+
     def _ensure_system_tables(self, conn: sqlite3.Connection) -> None:
         conn.execute("""
             CREATE TABLE IF NOT EXISTS dataset_registry (

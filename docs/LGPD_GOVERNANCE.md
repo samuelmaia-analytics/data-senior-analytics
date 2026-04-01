@@ -34,3 +34,4 @@ It provides engineering controls that support a privacy-by-design posture, but l
 ## References
 - Brazil LGPD official text: Lei nº 13.709/2018, especially Articles 5 and 6.
 - ANPD guidance on anonymization and privacy governance.
+- Operational retention procedure: [RETENTION_RUNBOOK.md](RETENTION_RUNBOOK.md)

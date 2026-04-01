@@ -423,6 +423,7 @@ def render_home(
     privacy_snapshot: dict[str, Any] | None,
 ) -> None:
     st.subheader("Summary")
+    purged_datasets = db.purge_expired_datasets()
     decision_brief = build_decision_brief(
         quality_summary=quality_summary,
         business_snapshot=business_snapshot,
@@ -454,6 +455,21 @@ def render_home(
             )
         with k4:
             st.metric("Items sold", format_compact_number(business_snapshot["items_sold"]))
+
+    expiring_registry = db.get_expiring_datasets(within_days=14)
+    governance_metrics = st.columns(4)
+    with governance_metrics[0]:
+        st.metric("Registered datasets", len(db.get_dataset_registry()))
+    with governance_metrics[1]:
+        st.metric("Expiring in 14d", len(expiring_registry))
+    with governance_metrics[2]:
+        st.metric("Purged now", purged_datasets)
+    with governance_metrics[3]:
+        personal_datasets = 0
+        registry = db.get_dataset_registry()
+        if not registry.empty:
+            personal_datasets = int(registry["contains_personal_data"].fillna(0).sum())
+        st.metric("Datasets with personal data", personal_datasets)
 
     st.markdown(
         f"""
@@ -556,6 +572,10 @@ def render_home(
         )
         for control in privacy_snapshot["controls"]:
             st.write(f"- {control}")
+
+    if not expiring_registry.empty:
+        st.markdown("### Retention Watch")
+        st.dataframe(expiring_registry.head(10), width="stretch")
 
     if business_snapshot:
         st.markdown("### Business Briefing")
