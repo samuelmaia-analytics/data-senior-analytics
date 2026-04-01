@@ -7,7 +7,7 @@
 [![Streamlit](https://img.shields.io/badge/Streamlit-Live_App-FF4B4B?logo=streamlit&logoColor=white)](https://data-analytics-sr.streamlit.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-0f172a.svg)](LICENSE)
 
-Analytics project built as a senior-level engineering portfolio piece: a Streamlit dashboard that goes beyond charts and orchestrates automated curation, profiling, executive signals, SQLite persistence, and deployment governance.
+Analytics project that turns tabular files into a curated, traceable, decision-ready workflow with a Streamlit dashboard, SQLite persistence, and deployment governance.
 
 Live demo: https://data-analytics-sr.streamlit.app
 
@@ -22,7 +22,7 @@ This repository solves that through a layered approach:
 - persistence of curated datasets into SQLite
 - engineering discipline with lint, tests, coverage, deploy preflight, and operational documentation
 
-## Why this project signals seniority
+## Maturity Signals
 - It translates technical data risk into business language: `Quality Score`, `Completeness`, `Priority actions`.
 - It treats Streamlit as a product and operations surface, not as a notebook with widgets.
 - It separates concerns across `dashboard/`, `src/analysis/`, `src/data/`, and `config/`.

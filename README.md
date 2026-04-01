@@ -7,7 +7,7 @@
 [![Streamlit](https://img.shields.io/badge/Streamlit-Live_App-FF4B4B?logo=streamlit&logoColor=white)](https://data-analytics-sr.streamlit.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-0f172a.svg)](LICENSE)
 
-Projeto de analytics desenhado como portfólio de engenharia sênior: um dashboard Streamlit que não apenas mostra gráficos, mas orquestra curadoria automática, profiling, sinais executivos, persistência em SQLite e governança de deploy.
+Projeto de analytics que transforma arquivos tabulares em um fluxo curado, rastreável e pronto para tomada de decisão, com dashboard Streamlit, persistência em SQLite e governança de deploy.
 
 Demo online: https://data-analytics-sr.streamlit.app
 
@@ -22,7 +22,7 @@ Este repositório resolve isso com uma abordagem em camadas:
 - persistência do dataset curado em SQLite
 - disciplina de engenharia com lint, testes, cobertura, preflight de deploy e rastreabilidade
 
-## Por que este projeto sinaliza senioridade
+## Sinais de Maturidade
 - Traduz risco técnico em linguagem de negócio: `Quality Score`, `Completeness`, `Priority actions`.
 - Trata Streamlit como camada de produto e operação, não como notebook com widgets.
 - Separa responsabilidades entre `dashboard/`, `src/analysis/`, `src/data/` e `config/`.
@@ -31,7 +31,7 @@ Este repositório resolve isso com uma abordagem em camadas:
 - Usa testes e gates de CI para proteger comportamento e contratos de saída.
 
 ## O que o dashboard entrega
-- `Overview`: briefing executivo com KPI comerciais, top category, top region, trend de receita e status de qualidade.
+- `Overview`: resumo executivo com KPI comerciais, top category, top region, trend de receita e status de qualidade.
 - `Upload`: ingestão com curadoria automática e score de qualidade imediatamente após a carga.
 - `Data`: visão lado a lado de bruto vs. curado, perfil de colunas e log do pipeline aplicado.
 - `EDA`: insights automatizados, estatísticas, correlação e perfil de valores ausentes.
