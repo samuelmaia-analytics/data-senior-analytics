@@ -80,7 +80,10 @@ def test_summarize_transformation_log_generates_readable_messages():
         [
             {
                 "operation": "clean_column_names",
-                "details": {"original": ["Client ID", "Sale Value"], "new": ["client_id", "sale_value"]},
+                "details": {
+                    "original": ["Client ID", "Sale Value"],
+                    "new": ["client_id", "sale_value"],
+                },
             },
             {
                 "operation": "handle_missing_values",

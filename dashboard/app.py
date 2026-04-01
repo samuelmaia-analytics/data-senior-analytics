@@ -309,7 +309,9 @@ def render_home(
             st.markdown('<div class="exec-card-title">Objective</div>', unsafe_allow_html=True)
             st.write("Turn tabular data into actionable insights with governed, curated outputs.")
             st.markdown('<div class="exec-card-title">Value</div>', unsafe_allow_html=True)
-            st.write("Upload raw files, standardize them automatically, and expose decision-ready metrics.")
+            st.write(
+                "Upload raw files, standardize them automatically, and expose decision-ready metrics."
+            )
 
     with right:
         with st.container(border=True):
@@ -333,7 +335,9 @@ def render_home(
             f"Missing: {quality_summary['missing_pct']:.2f}% | "
             f"Duplicates: {quality_summary['duplicate_pct']:.2f}%."
         )
-        action_msg = priority_actions[0] if priority_actions else "Persist curated outputs in SQLite."
+        action_msg = (
+            priority_actions[0] if priority_actions else "Persist curated outputs in SQLite."
+        )
     else:
         insight_msg = "No active dataset to generate executive insights."
         risk_msg = "Risk cannot be estimated without loaded data."
@@ -363,7 +367,9 @@ def render_home(
     with d2:
         with st.container(border=True):
             st.markdown("#### Engineering Signals")
-            st.write("- Layered architecture with explicit analytics, data, and dashboard concerns.")
+            st.write(
+                "- Layered architecture with explicit analytics, data, and dashboard concerns."
+            )
             st.write("- Structured logging with trace id and page timing.")
             st.write("- Tests, lint, preflight, and provenance gates remain active.")
 
@@ -407,11 +413,15 @@ def render_home(
 
 def render_upload(db: SQLiteManager, quality_summary: dict[str, Any] | None) -> None:
     st.subheader("Data Upload")
-    st.caption("Load a demo dataset or upload CSV/XLSX. The dashboard applies smart curation automatically.")
+    st.caption(
+        "Load a demo dataset or upload CSV/XLSX. The dashboard applies smart curation automatically."
+    )
 
     demo_col_1, demo_col_2 = st.columns(2)
     with demo_col_1:
-        if st.button("Load default demo (12 rows)", key="load_default_demo_button", width="stretch"):
+        if st.button(
+            "Load default demo (12 rows)", key="load_default_demo_button", width="stretch"
+        ):
             df_demo = load_default_demo_data()
             if df_demo.empty:
                 st.error("default_demo.csv not found in data/sample.")
