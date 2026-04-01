@@ -40,6 +40,7 @@ Live demo: https://data-analytics-sr.streamlit.app
 ## Screenshots / Demo
 ![Dashboard Preview](assets/images/dashboard-preview.png)
 ![Dashboard Insight View](assets/images/Screenshot_2.png)
+![Dashboard Walkthrough](assets/images/dashboard-walkthrough.gif)
 
 ## Architecture
 ```mermaid
