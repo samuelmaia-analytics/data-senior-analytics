@@ -1,7 +1,7 @@
 # Architecture
 
-## Executive Summary
-The project uses a layered analytics architecture to turn raw tabular inputs into curated, decision-ready outputs. The Streamlit dashboard is the product surface, but the design intentionally separates curation, profiling, executive scoring, persistence, and operational controls.
+## Summary
+The project uses a layered analytics architecture to turn raw tabular inputs into curated, decision-ready outputs. The Streamlit dashboard is the product surface, but the design intentionally separates curation, profiling, business scoring, persistence, and operational controls.
 
 ## Architectural Intent
 - Preserve a clean boundary between UI concerns and analytical workflow orchestration.
@@ -10,9 +10,9 @@ The project uses a layered analytics architecture to turn raw tabular inputs int
 - Make deployment and governance first-class parts of the system.
 
 ## Layers
-- Presentation layer: `dashboard/app.py` renders the executive interface, KPI surfaces, EDA tabs, and persistence actions.
-- Dashboard analytics layer: `dashboard/utils/analytics.py` translates profiling into quality score, priority actions, executive snapshot, and correlation summaries.
-- Application service layer: `src/app/curation_service.py` orchestrates curation, profiling, scoring, and executive metadata generation.
+- Presentation layer: `dashboard/app.py` renders the interface, KPI surfaces, EDA tabs, and persistence actions.
+- Dashboard analytics layer: `dashboard/utils/analytics.py` translates profiling into quality score, priority actions, business snapshot, and correlation summaries.
+- Application service layer: `src/app/curation_service.py` orchestrates curation, profiling, scoring, and business metadata generation.
 - Domain analytics layer: `src/analysis/exploratory.py` generates descriptive statistics and automated insights.
 - Data curation layer: `src/data/transformer.py` standardizes column names, infers types, handles missing values, and removes duplicates.
 - Persistence layer: `src/data/sqlite_manager.py` stores curated outputs in SQLite for downstream inspection and reuse.
@@ -25,10 +25,10 @@ flowchart LR
     B --> C[Curation service]
     C --> D[Curated DataFrame]
     D --> E[ExploratoryAnalyzer]
-    D --> F[Executive score + snapshot]
+    D --> F[Business score + snapshot]
     D --> G[(SQLite)]
     E --> H[EDA + diagnostics]
-    F --> I[Executive dashboard]
+    F --> I[Decision dashboard]
 ```
 
 ## Runtime Sequence
@@ -48,14 +48,14 @@ sequenceDiagram
     TR-->>AP: Curated DataFrame + transformation log
     AP->>AN: Produce statistics and automated insights
     AN-->>AP: Analytical profile
-    AP->>AU: Build quality summary and executive snapshot
+    AP->>AU: Build quality summary and business snapshot
     AU-->>UI: KPI, quality score, priority actions
     UI->>DB: Persist curated dataset (optional)
     DB-->>UI: Queryable analytical tables
 ```
 
 ## Dashboard Operating Model
-- `Overview`: executive KPI, quality status, board briefing, commercial concentration, and trend view.
+- `Overview`: KPI, quality status, business briefing, commercial concentration, and trend view.
 - `Upload`: raw-to-curated transition with immediate quality feedback.
 - `Data`: raw vs. curated inspection, column profile, and transformation log.
 - `EDA`: automated insights, descriptive statistics, missing profile, and strongest correlations.

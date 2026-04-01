@@ -47,7 +47,7 @@ st.set_page_config(
 APP_LOGGER = get_structured_logger("dashboard_app")
 
 
-def apply_executive_style() -> None:
+def apply_dashboard_style() -> None:
     st.markdown(
         """
         <style>
@@ -232,7 +232,7 @@ def apply_dataset_to_session(df: pd.DataFrame, data_name: str, data_source: str)
     st.session_state.transform_log = artifacts.transform_log
     st.session_state.quality_summary = artifacts.quality_summary
     st.session_state.priority_actions = artifacts.priority_actions
-    st.session_state.executive_snapshot = artifacts.executive_snapshot
+    st.session_state.business_snapshot = artifacts.business_snapshot
 
 
 def clear_dataset_state() -> None:
@@ -245,7 +245,7 @@ def clear_dataset_state() -> None:
         "transform_log",
         "quality_summary",
         "priority_actions",
-        "executive_snapshot",
+        "business_snapshot",
     ):
         if key in st.session_state:
             del st.session_state[key]
@@ -261,7 +261,7 @@ def ensure_session_defaults() -> None:
         "transform_log": [],
         "quality_summary": None,
         "priority_actions": [],
-        "executive_snapshot": None,
+        "business_snapshot": None,
         "selected_page": "Overview",
     }
     for key, value in defaults.items():
@@ -318,7 +318,7 @@ def render_home(
     quality_summary: dict[str, Any] | None,
     analysis: dict[str, Any] | None,
     priority_actions: list[str],
-    executive_snapshot: dict[str, Any] | None,
+    business_snapshot: dict[str, Any] | None,
 ) -> None:
     st.subheader("Summary")
 
@@ -333,16 +333,16 @@ def render_home(
     with c4:
         st.metric("SQLite tables", len(db.list_tables()))
 
-    if executive_snapshot:
+    if business_snapshot:
         k1, k2, k3, k4 = st.columns(4)
         with k1:
-            st.metric("Revenue", format_currency(executive_snapshot["revenue"]))
+            st.metric("Revenue", format_currency(business_snapshot["revenue"]))
         with k2:
-            st.metric("Average ticket", format_currency(executive_snapshot["avg_ticket"]))
+            st.metric("Average ticket", format_currency(business_snapshot["avg_ticket"]))
         with k3:
-            st.metric("Unique clients", format_compact_number(executive_snapshot["unique_clients"]))
+            st.metric("Unique clients", format_compact_number(business_snapshot["unique_clients"]))
         with k4:
-            st.metric("Items sold", format_compact_number(executive_snapshot["items_sold"]))
+            st.metric("Items sold", format_compact_number(business_snapshot["items_sold"]))
 
     left, right = st.columns(2)
     with left:
@@ -398,7 +398,7 @@ def render_home(
             st.markdown('<span class="exec-pill">Action</span>', unsafe_allow_html=True)
             st.write(action_msg)
 
-    if executive_snapshot:
+    if business_snapshot:
         st.markdown("### Business Briefing")
         b1, b2, b3 = st.columns(3)
         with b1:
@@ -406,7 +406,7 @@ def render_home(
                 f"""
                 <div class="board-card">
                     <p class="board-kicker">Commercial Focus</p>
-                    <h3 class="board-title">Top category: {executive_snapshot['top_category'] or 'N/A'}</h3>
+                    <h3 class="board-title">Top category: {business_snapshot['top_category'] or 'N/A'}</h3>
                     <p class="board-copy">
                         Revenue concentration is currently led by the strongest category. Use this signal to prioritize portfolio
                         defense, pricing actions, and cross-sell strategy.
@@ -420,7 +420,7 @@ def render_home(
                 f"""
                 <div class="board-card">
                     <p class="board-kicker">Regional Signal</p>
-                    <h3 class="board-title">Top region: {executive_snapshot['top_region'] or 'N/A'}</h3>
+                    <h3 class="board-title">Top region: {business_snapshot['top_region'] or 'N/A'}</h3>
                     <p class="board-copy">
                         Regional mix identifies where commercial momentum is strongest and where leadership should inspect execution
                         variance, service quality, or distribution gaps.
@@ -479,9 +479,9 @@ def render_home(
         for insight in analysis.get("insights", [])[:4]:
             st.write(f"- {insight}")
 
-    if executive_snapshot and not executive_snapshot["revenue_by_category"].empty:
+    if business_snapshot and not business_snapshot["revenue_by_category"].empty:
         chart_left, chart_right = st.columns([1.3, 1])
-        category_revenue = executive_snapshot["revenue_by_category"].head(10)
+        category_revenue = business_snapshot["revenue_by_category"].head(10)
         fig = px.bar(
             category_revenue,
             x="valor_total",
@@ -495,7 +495,7 @@ def render_home(
             st.plotly_chart(fig, width="stretch")
 
         with chart_right:
-            trend_df = executive_snapshot["revenue_trend"]
+            trend_df = business_snapshot["revenue_trend"]
             if isinstance(trend_df, pd.DataFrame) and not trend_df.empty:
                 trend_fig = px.line(
                     trend_df,
@@ -828,7 +828,7 @@ def render_settings(
 def main() -> None:
     trace_id = new_trace_id()
     ensure_session_defaults()
-    apply_executive_style()
+    apply_dashboard_style()
     db = get_db()
     df = st.session_state.data
     raw_df = st.session_state.raw_data
@@ -836,7 +836,7 @@ def main() -> None:
     transform_log = st.session_state.transform_log
     quality_summary = st.session_state.quality_summary
     priority_actions = st.session_state.priority_actions
-    executive_snapshot = st.session_state.executive_snapshot
+    business_snapshot = st.session_state.business_snapshot
 
     APP_LOGGER.info(
         "app_start",
@@ -887,7 +887,7 @@ def main() -> None:
 
     page_handlers = {
         "Overview": lambda: render_home(
-            df, db, quality_summary, analysis, priority_actions, executive_snapshot
+            df, db, quality_summary, analysis, priority_actions, business_snapshot
         ),
         "Upload": lambda: render_upload(db, quality_summary),
         "Data": lambda: render_data_preview(df, raw_df, transform_log),

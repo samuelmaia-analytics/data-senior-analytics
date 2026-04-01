@@ -14,7 +14,7 @@ POLICY_PATH = Path(__file__).resolve().parents[2] / "config" / "dashboard_policy
 
 @lru_cache(maxsize=1)
 def load_dashboard_policy() -> dict[str, object]:
-    """Load executive dashboard scoring policies from versioned config."""
+    """Load dashboard scoring policies from versioned config."""
     with POLICY_PATH.open(encoding="utf-8") as policy_file:
         return json.load(policy_file)
 
@@ -95,7 +95,7 @@ def interpret_correlation(corr: float) -> tuple[str, str]:
 def build_data_quality_summary(
     df: pd.DataFrame, policy: dict[str, object] | None = None
 ) -> dict[str, float | int | str]:
-    """Build an executive-ready summary of dataset quality."""
+    """Build a decision-ready summary of dataset quality."""
     quality_policy = (policy or load_dashboard_policy())["quality_score"]
     rows, columns = df.shape
     total_cells = max(1, rows * columns)
@@ -161,7 +161,7 @@ def build_priority_actions(
     actions: list[str] = []
 
     if float(summary["missing_pct"]) > float(action_policy["missing_pct_threshold"]):
-        actions.append("Prioritize null handling before sharing executive insights.")
+        actions.append("Prioritize null handling before sharing business-facing insights.")
     if float(summary["duplicate_pct"]) > float(action_policy["duplicate_pct_threshold"]):
         actions.append("Review business keys and deduplication to avoid double counting.")
     if int(summary["numeric_columns"]) == 0:
@@ -169,7 +169,7 @@ def build_priority_actions(
     if int(summary["rows"]) < int(action_policy["minimum_rows"]):
         actions.append("Increase sample size before making high-confidence decisions.")
     if not actions:
-        actions.append("Dataset is ready for executive exploration and analytical persistence.")
+        actions.append("Dataset is ready for analytical exploration and persistence.")
 
     return actions
 
@@ -203,8 +203,8 @@ def summarize_transformation_log(log: list[dict]) -> list[str]:
     return summary
 
 
-def build_executive_snapshot(df: pd.DataFrame) -> dict[str, object]:
-    """Build a board-ready snapshot from the curated dataset."""
+def build_business_snapshot(df: pd.DataFrame) -> dict[str, object]:
+    """Build a business snapshot from the curated dataset."""
     snapshot: dict[str, object] = {
         "revenue": None,
         "orders": int(len(df)),
@@ -271,7 +271,7 @@ def build_executive_snapshot(df: pd.DataFrame) -> dict[str, object]:
 
 
 def summarize_correlation_pairs(df: pd.DataFrame, top_n: int = 5) -> pd.DataFrame:
-    """Return the strongest correlation pairs for executive review."""
+    """Return the strongest correlation pairs for business review."""
     numeric_df = df.select_dtypes(include=[np.number])
     if numeric_df.shape[1] < 2:
         return pd.DataFrame(columns=["left", "right", "correlation", "strength"])

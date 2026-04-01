@@ -1,7 +1,7 @@
 # Data Contract
 
 ## Objective
-Define the minimum guarantees expected across `raw`, `bronze`, `silver`, and `gold` layers so downstream analysis, persistence, and executive reporting remain stable.
+Define the minimum guarantees expected across `raw`, `bronze`, `silver`, and `gold` layers so downstream analysis, persistence, and decision reporting remain stable.
 
 ## Layer Guarantees
 

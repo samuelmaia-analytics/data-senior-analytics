@@ -53,10 +53,10 @@ flowchart LR
     B --> C[DataTransformer]
     C --> D[Curated DataFrame]
     D --> E[ExploratoryAnalyzer]
-    D --> F[Executive Snapshot + Quality Score]
+    D --> F[Business Snapshot + Quality Score]
     D --> G[(SQLite)]
     E --> H[EDA + Diagnostics]
-    F --> I[Executive Dashboard]
+    F --> I[Decision Dashboard]
 ```
 
 Documentação relacionada:

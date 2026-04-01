@@ -1,8 +1,8 @@
 import pandas as pd
 
 from dashboard.utils.analytics import (
+    build_business_snapshot,
     build_data_quality_summary,
-    build_executive_snapshot,
     build_priority_actions,
     detect_column_types,
     get_basic_stats,
@@ -121,7 +121,7 @@ def test_summarize_transformation_log_generates_readable_messages():
     assert any("Duplicate removal" in item for item in summary)
 
 
-def test_build_executive_snapshot_extracts_business_kpis():
+def test_build_business_snapshot_extracts_business_kpis():
     df = pd.DataFrame(
         {
             "data": ["2025-01-01", "2025-01-02", "2025-01-03"],
@@ -134,7 +134,7 @@ def test_build_executive_snapshot_extracts_business_kpis():
         }
     )
 
-    snapshot = build_executive_snapshot(df)
+    snapshot = build_business_snapshot(df)
 
     assert snapshot["revenue"] == 550.0
     assert round(float(snapshot["avg_ticket"]), 2) == round(550.0 / 3, 2)

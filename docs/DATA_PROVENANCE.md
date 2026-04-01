@@ -26,7 +26,7 @@
 - Always register the official Kaggle URL and the snapshot date used.
 - Do not commit raw files under `data/raw/`.
 - Synthetic example files are for local demonstration only.
-- Any executive report must cite the dataset source and license.
+- Any business-facing report must cite the dataset source and license.
 
 ## Reproducibility Evidence
 - Source configuration: [config/data_source.yaml](../config/data_source.yaml)

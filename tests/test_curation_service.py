@@ -22,5 +22,5 @@ def test_curate_dataset_returns_curated_artifacts():
     assert artifacts.curated_df.shape[0] == 2
     assert "valor_total" in artifacts.curated_df.columns
     assert artifacts.quality_summary["quality_score"] <= 100
-    assert artifacts.executive_snapshot["revenue"] == 350.0
+    assert artifacts.business_snapshot["revenue"] == 350.0
     assert len(artifacts.priority_actions) >= 1

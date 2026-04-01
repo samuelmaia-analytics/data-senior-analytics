@@ -8,8 +8,8 @@ from typing import Any
 import pandas as pd
 
 from dashboard.utils.analytics import (
+    build_business_snapshot,
     build_data_quality_summary,
-    build_executive_snapshot,
     build_priority_actions,
 )
 from src.analysis.exploratory import ExploratoryAnalyzer
@@ -24,7 +24,7 @@ class CurationArtifacts:
     transform_log: list[dict[str, Any]]
     quality_summary: dict[str, Any]
     priority_actions: list[str]
-    executive_snapshot: dict[str, Any]
+    business_snapshot: dict[str, Any]
 
 
 def curate_dataset(df: pd.DataFrame) -> CurationArtifacts:
@@ -41,7 +41,7 @@ def curate_dataset(df: pd.DataFrame) -> CurationArtifacts:
     transform_log = transformer.get_transformation_log()
     quality_summary = build_data_quality_summary(curated_df)
     priority_actions = build_priority_actions(quality_summary)
-    executive_snapshot = build_executive_snapshot(curated_df)
+    business_snapshot = build_business_snapshot(curated_df)
 
     return CurationArtifacts(
         raw_df=raw_df,
@@ -50,5 +50,5 @@ def curate_dataset(df: pd.DataFrame) -> CurationArtifacts:
         transform_log=transform_log,
         quality_summary=quality_summary,
         priority_actions=priority_actions,
-        executive_snapshot=executive_snapshot,
+        business_snapshot=business_snapshot,
     )
