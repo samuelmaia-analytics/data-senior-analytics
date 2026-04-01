@@ -12,12 +12,14 @@ Define how retained datasets are tracked, reviewed, and removed from SQLite.
 - The app checks for expired datasets on `Overview` load.
 - Expired datasets are dropped automatically.
 - Every purge is written to the SQLite audit log.
+- A manual purge can be triggered with `python scripts/purge_expired_datasets.py`.
 
 ## Operating Steps
 1. Review `Database` > `Persistence Registry`.
 2. Check `Expiring in 14d` on the `Overview`.
 3. Confirm whether datasets nearing expiry must be re-persisted or allowed to expire.
 4. Review `Audit Log` for purge and persistence history.
+5. Use `make purge-retention` or `python scripts/purge_expired_datasets.py` for a manual run outside the UI.
 
 ## Persistence Modes
 - `curated`: curated dataset stored without masking

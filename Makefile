@@ -1,6 +1,6 @@
 ﻿SHELL := /bin/bash
 
-.PHONY: setup install install-dev lint test quality preflight format run manifest security
+.PHONY: setup install install-dev lint test quality preflight format run manifest security purge-retention
 
 setup: install-dev
 
@@ -41,3 +41,6 @@ manifest:
 
 security:
 	python scripts/check_secrets.py
+
+purge-retention:
+	python scripts/purge_expired_datasets.py

@@ -67,3 +67,32 @@ def test_sqlite_manager_purges_expired_datasets(tmp_path: Path):
     assert "expired_table" not in manager.list_tables()
     audit_log = manager.get_dataset_audit_log("expired_table")
     assert "purge_expired_dataset" in audit_log["action"].tolist()
+
+
+def test_sqlite_manager_logs_export_events(tmp_path: Path):
+    db_path = tmp_path / "export.db"
+    manager = SQLiteManager(db_path=str(db_path))
+    df = pd.DataFrame({"valor_total": [10.0]})
+
+    manager.df_to_sql(
+        df,
+        "export_table",
+        metadata={
+            "retention_days": 30,
+            "persistence_mode": "masked",
+            "contains_personal_data": True,
+            "contains_sensitive_data": False,
+            "legal_basis_acknowledged": True,
+            "privacy_risk_level": "Medium",
+        },
+    )
+    manager.log_export_event(
+        table_name="export_table",
+        export_format="csv",
+        export_mode="masked",
+        contains_personal_data=True,
+    )
+
+    audit_log = manager.get_dataset_audit_log("export_table")
+
+    assert "export_dataset" in audit_log["action"].tolist()

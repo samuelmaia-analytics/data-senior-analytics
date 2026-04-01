@@ -108,6 +108,7 @@ python -m streamlit run dashboard/app.py
 - Encoding, provenance, and data manifest validation.
 - Basic governance and privacy controls for personal data in previews and persistence.
 - Persistence registry and audit trail in SQLite.
+- Schedulable retention purge script and governed export with audit.
 - Deployment runtime aligned on `Python 3.11`.
 - Dashboard smoke tests as part of product-surface validation.
 

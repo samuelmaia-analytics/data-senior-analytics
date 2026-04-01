@@ -25,6 +25,7 @@ This folder consolidates the technical, operational, and governance narrative be
 - Governance is visible in the UI through freshness, source, transformation count, and quality status.
 - The analytics layer now produces both business concentration signals and operational confidence signals.
 - Privacy controls are now visible through masking, LGPD risk signals, and safer persistence defaults.
+- Dataset catalog, governed export, and retention purge are now part of the operational surface.
 
 ## ADRs
 - [ADR-0001-streamlit-presentation-layer.md](adr/ADR-0001-streamlit-presentation-layer.md)

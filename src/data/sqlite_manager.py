@@ -257,6 +257,42 @@ class SQLiteManager:
         finally:
             self.disconnect()
 
+    def log_export_event(
+        self,
+        table_name: str,
+        export_format: str,
+        export_mode: str,
+        contains_personal_data: bool,
+    ) -> None:
+        conn = self.connect()
+        if not conn:
+            return
+
+        try:
+            event_at = datetime.now().isoformat(timespec="seconds")
+            conn.execute(
+                """
+                INSERT INTO dataset_audit_log (event_at, table_name, action, metadata_json)
+                VALUES (?, ?, ?, ?)
+                """,
+                (
+                    event_at,
+                    table_name,
+                    "export_dataset",
+                    json.dumps(
+                        {
+                            "export_format": export_format,
+                            "export_mode": export_mode,
+                            "contains_personal_data": contains_personal_data,
+                        },
+                        ensure_ascii=False,
+                    ),
+                ),
+            )
+            conn.commit()
+        finally:
+            self.disconnect()
+
     def _ensure_system_tables(self, conn: sqlite3.Connection) -> None:
         conn.execute("""
             CREATE TABLE IF NOT EXISTS dataset_registry (

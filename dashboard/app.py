@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
+from io import BytesIO
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -304,6 +305,17 @@ def format_compact_number(value: float | int | None) -> str:
     if abs(float(value)) >= 1_000:
         return f"{float(value) / 1_000:.1f}K"
     return f"{float(value):,.0f}"
+
+
+def dataframe_to_csv_bytes(df: pd.DataFrame) -> bytes:
+    return df.to_csv(index=False).encode("utf-8")
+
+
+def dataframe_to_excel_bytes(df: pd.DataFrame) -> bytes:
+    buffer = BytesIO()
+    with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="dataset")
+    return buffer.getvalue()
 
 
 def apply_dataset_to_session(df: pd.DataFrame, data_name: str, data_source: str) -> None:
@@ -1090,32 +1102,99 @@ def render_charts(df: pd.DataFrame | None) -> None:
 def render_database(db: SQLiteManager, privacy_snapshot: dict[str, Any] | None) -> None:
     st.subheader("SQLite Database")
     tables = db.list_tables()
+    registry = db.get_dataset_registry()
     if not tables:
         st.info("No tables found in SQLite.")
-    registry = db.get_dataset_registry()
     if not registry.empty:
-        st.markdown("### Persistence Registry")
-        st.dataframe(registry, width="stretch")
+        tab_catalog, tab_tables = st.tabs(["Dataset Catalog", "Table Explorer"])
+        with tab_catalog:
+            st.markdown("### Persistence Registry")
+            st.dataframe(registry, width="stretch")
+        with tab_tables:
+            pass
+    else:
+        tab_catalog = None
+        tab_tables = None
 
     if not tables:
         return
 
-    table = st.selectbox("Table", tables, key="database_table")
-    count = db.fetch_scalar(f"SELECT COUNT(*) FROM [{table}]") or 0
-    st.metric("Rows in table", int(count))
+    active_container = tab_tables if tab_tables is not None else st.container()
+    with active_container:
+        table = st.selectbox("Table", tables, key="database_table")
+        count = db.fetch_scalar(f"SELECT COUNT(*) FROM [{table}]") or 0
+        st.metric("Rows in table", int(count))
 
-    preview = db.sql_to_df(f"SELECT * FROM [{table}] LIMIT 500")
-    st.caption("Table preview (up to 500 rows)")
-    if privacy_snapshot and privacy_snapshot["personal_data_detected"]:
-        masked_preview = mask_sensitive_dataframe(preview, privacy_snapshot["personal_columns"])
-        st.dataframe(masked_preview, width="stretch")
-    else:
-        st.dataframe(preview, width="stretch")
+        preview = db.sql_to_df(f"SELECT * FROM [{table}] LIMIT 500")
+        full_export_df = db.sql_to_df(f"SELECT * FROM [{table}]")
+        registry_row = (
+            registry.loc[registry["table_name"] == table] if not registry.empty else pd.DataFrame()
+        )
+        contains_personal_data = (
+            bool(int(registry_row.iloc[0]["contains_personal_data"]))
+            if not registry_row.empty
+            else False
+        )
+        active_personal_columns = (
+            privacy_snapshot["personal_columns"]
+            if privacy_snapshot and privacy_snapshot["personal_columns"]
+            else []
+        )
+        st.caption("Table preview (up to 500 rows)")
+        if contains_personal_data and active_personal_columns:
+            masked_preview = mask_sensitive_dataframe(preview, active_personal_columns)
+            st.dataframe(masked_preview, width="stretch")
+        else:
+            st.dataframe(preview, width="stretch")
 
-    audit_log = db.get_dataset_audit_log(table)
-    if not audit_log.empty:
-        st.markdown("### Audit Log")
-        st.dataframe(audit_log, width="stretch")
+        export_masked = st.checkbox(
+            "Export masked dataset",
+            value=contains_personal_data,
+            key=f"export_masked_{table}",
+        )
+        export_df = (
+            mask_sensitive_dataframe(full_export_df, active_personal_columns)
+            if export_masked and active_personal_columns
+            else full_export_df
+        )
+        csv_bytes = dataframe_to_csv_bytes(export_df)
+        excel_bytes = dataframe_to_excel_bytes(export_df)
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.download_button(
+                "Download CSV",
+                data=csv_bytes,
+                file_name=f"{table}.csv",
+                mime="text/csv",
+                key=f"download_csv_{table}",
+                width="stretch",
+            ):
+                db.log_export_event(
+                    table_name=table,
+                    export_format="csv",
+                    export_mode="masked" if export_masked else "full",
+                    contains_personal_data=contains_personal_data,
+                )
+        with c2:
+            if st.download_button(
+                "Download XLSX",
+                data=excel_bytes,
+                file_name=f"{table}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                key=f"download_xlsx_{table}",
+                width="stretch",
+            ):
+                db.log_export_event(
+                    table_name=table,
+                    export_format="xlsx",
+                    export_mode="masked" if export_masked else "full",
+                    contains_personal_data=contains_personal_data,
+                )
+
+        audit_log = db.get_dataset_audit_log(table)
+        if not audit_log.empty:
+            st.markdown("### Audit Log")
+            st.dataframe(audit_log, width="stretch")
 
 
 def render_settings(

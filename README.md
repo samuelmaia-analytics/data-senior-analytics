@@ -108,6 +108,7 @@ python -m streamlit run dashboard/app.py
 - Checks de encoding, proveniência e manifesto de dados.
 - Controles básicos de governança e LGPD para dados pessoais em preview e persistência.
 - Registro de persistência e trilha de auditoria no SQLite.
+- Script agendável de purge por retenção e export governado com auditoria.
 - Runtime de deploy alinhado em `Python 3.11`.
 - Smoke test do dashboard como superfície de produto.
 
