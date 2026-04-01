@@ -107,6 +107,7 @@ python -m streamlit run dashboard/app.py
 - Preflight para Streamlit Cloud.
 - Checks de encoding, proveniência e manifesto de dados.
 - Controles básicos de governança e LGPD para dados pessoais em preview e persistência.
+- Registro de persistência e trilha de auditoria no SQLite.
 - Runtime de deploy alinhado em `Python 3.11`.
 - Smoke test do dashboard como superfície de produto.
 

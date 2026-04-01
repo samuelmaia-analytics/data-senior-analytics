@@ -9,6 +9,7 @@ This project now applies basic privacy governance controls for analytics workflo
 - LGPD risk classification in the product surface (`Minimal`, `Low`, `Medium`, `High`).
 - Extra acknowledgement before persisting personal data into SQLite.
 - Masked persistence enabled by default when personal data is detected.
+- Persistence registry with retention metadata and audit log in SQLite.
 
 ## Why These Controls Exist
 The LGPD defines:
@@ -28,6 +29,7 @@ It provides engineering controls that support a privacy-by-design posture, but l
 - Dashboard previews are treated as a lower-trust surface and should not expose direct identifiers by default.
 - SQLite persistence is treated as a control point, not a neutral storage action.
 - Governance metadata should accompany analytical quality metadata.
+- Retention must be explicit at persistence time, not inferred after the fact.
 
 ## References
 - Brazil LGPD official text: Lei nº 13.709/2018, especially Articles 5 and 6.

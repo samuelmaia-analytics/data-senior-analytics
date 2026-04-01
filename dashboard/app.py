@@ -809,6 +809,12 @@ def render_upload(db: SQLiteManager, quality_summary: dict[str, Any] | None) -> 
         value=bool(privacy_snapshot and privacy_snapshot["safe_persistence_default"]),
         key="persist_masked_dataset",
     )
+    retention_days = st.selectbox(
+        "Retention period",
+        options=[30, 90, 180, 365],
+        index=1,
+        key="retention_days",
+    )
     lgpd_ack = st.checkbox(
         "I reviewed lawful basis, minimization, and retention for this dataset",
         value=False,
@@ -821,7 +827,32 @@ def render_upload(db: SQLiteManager, quality_summary: dict[str, Any] | None) -> 
             )
             return
         dataset_to_persist = masked_df if persist_masked else curated_df
-        ok = db.df_to_sql(dataset_to_persist, table_name)
+        ok = db.df_to_sql(
+            dataset_to_persist,
+            table_name,
+            metadata={
+                "retention_days": retention_days,
+                "persistence_mode": "masked" if persist_masked else "curated",
+                "contains_personal_data": bool(
+                    privacy_snapshot and privacy_snapshot["personal_data_detected"]
+                ),
+                "contains_sensitive_data": bool(
+                    privacy_snapshot and privacy_snapshot["sensitive_data_detected"]
+                ),
+                "legal_basis_acknowledged": bool(lgpd_ack),
+                "privacy_risk_level": (
+                    privacy_snapshot["risk_level"] if privacy_snapshot else "Minimal"
+                ),
+                "source_name": st.session_state.data_name,
+                "data_source": st.session_state.data_source,
+                "personal_columns": (
+                    privacy_snapshot["personal_columns"] if privacy_snapshot else []
+                ),
+                "sensitive_columns": (
+                    privacy_snapshot["sensitive_columns"] if privacy_snapshot else []
+                ),
+            },
+        )
         if ok:
             st.success(f"Table saved: {table_name}")
         else:
@@ -1041,6 +1072,12 @@ def render_database(db: SQLiteManager, privacy_snapshot: dict[str, Any] | None) 
     tables = db.list_tables()
     if not tables:
         st.info("No tables found in SQLite.")
+    registry = db.get_dataset_registry()
+    if not registry.empty:
+        st.markdown("### Persistence Registry")
+        st.dataframe(registry, width="stretch")
+
+    if not tables:
         return
 
     table = st.selectbox("Table", tables, key="database_table")
@@ -1055,6 +1092,11 @@ def render_database(db: SQLiteManager, privacy_snapshot: dict[str, Any] | None) 
     else:
         st.dataframe(preview, width="stretch")
 
+    audit_log = db.get_dataset_audit_log(table)
+    if not audit_log.empty:
+        st.markdown("### Audit Log")
+        st.dataframe(audit_log, width="stretch")
+
 
 def render_settings(
     df: pd.DataFrame | None,
@@ -1063,6 +1105,7 @@ def render_settings(
     privacy_snapshot: dict[str, Any] | None,
 ) -> None:
     st.subheader("Settings and Runtime")
+    db = get_db()
     governance_snapshot = build_governance_snapshot(
         df=df,
         quality_summary=quality_summary,
@@ -1092,6 +1135,7 @@ def render_settings(
             ),
             "sqlite_path": str(Settings.SQLITE_PATH),
             "transformations": len(transform_log),
+            "registered_datasets": int(len(db.get_dataset_registry())),
         }
     )
 
