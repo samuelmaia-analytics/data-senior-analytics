@@ -1,61 +1,49 @@
-# Streamlit Cloud Deployment (Executive Standard)
+# Streamlit Cloud Deployment
 
-## 1. Repository Readiness
-- Main entrypoint: `dashboard/app.py`
-- Runtime pin: `runtime.txt`
-- Production dependencies: `requirements.txt`
-- Secrets template: `.streamlit/secrets.example.toml`
-- Data provenance: `docs/DATA_PROVENANCE.md` and `config/data_source.yaml`
+## Deployment Contract
+- Entrypoint: `dashboard/app.py`
+- Runtime: `python-3.11` in [runtime.txt](../runtime.txt)
+- Dependency source: [requirements.txt](../requirements.txt)
+- Streamlit version: `1.54.0`
 
-## 2. Streamlit Cloud App Settings
+## Repository Readiness
+- Keep `.streamlit/config.toml` at repo root.
+- Keep `.streamlit/secrets.toml` out of git; use `.streamlit/secrets.example.toml` as template.
+- Ensure demo data remains available in `data/sample/` for smoke tests.
+
+## Important Operational Lessons
+- If the app was originally created with the wrong Python version, redeploy alone may not be enough.
+- If Streamlit Cloud keeps using the wrong Python runtime, delete the app and recreate it with `Python 3.11`.
+- Prefer a single dependency source for the app. This repository uses `requirements.txt`, even though `pyproject.toml` exists for local tooling configuration.
+
+## App Creation Settings
 - Repository: `samuelmaia-analytics/data-senior-analytics`
 - Branch: `main`
 - Main file path: `dashboard/app.py`
-- Python version: read from `runtime.txt`
+- Python version: `3.11`
 
-## 3. Secrets and Configuration
-- Open Streamlit Cloud app settings -> `Secrets`
-- Paste values based on `.streamlit/secrets.example.toml`
-- Never commit `.streamlit/secrets.toml`
-
-## 4. Data Governance Requirements
-- Use real Kaggle dataset only
-- Register exact dataset metadata in `config/data_source.yaml` and set `provenance_status=approved`
-- Keep raw files out of Git (`data/raw/*` ignored)
-
-Optional helper:
-
-```bash
-python scripts/set_kaggle_provenance.py \
-  --dataset-name "YOUR_DATASET_NAME" \
-  --dataset-url "https://www.kaggle.com/datasets/USER/DATASET" \
-  --owner "USER" \
-  --license "LICENSE_NAME"
-```
-
-## 5. Pre-Deploy Quality Gates
-Optional shortcut:
-
-```bash
-make quality
-```
-
-Run locally before publish:
-
+## Local Pre-Deploy Checks
 ```bash
 python -m ruff check src config scripts dashboard tests
+python -m black --check src config scripts dashboard tests
 python -m pytest
 python scripts/check_encoding.py
 python scripts/streamlit_cloud_preflight.py
 python scripts/validate_data_provenance.py
+python scripts/generate_data_manifest.py --check
 ```
 
-## 6. Post-Deploy Smoke Test
-- Open deployed URL
-- Validate upload page
-- Validate one end-to-end flow:
-  - upload CSV/XLSX
-  - run EDA view
-  - render charts
-  - save/read SQLite table
-- Confirm no corrupted characters in UI text
+## Smoke Test Checklist
+1. Open the deployed URL.
+2. Confirm the `Overview` page renders without tracebacks.
+3. Navigate through `Upload`, `Data`, `EDA`, `Visualizations`, `Database`, and `Settings`.
+4. Upload a CSV/XLSX and verify the quality score updates.
+5. Save the curated dataset into SQLite and verify it appears in `Database`.
+
+## Troubleshooting
+- `Python 3.14.x` in logs:
+  Recreate the app and pin `Python 3.11`.
+- Dependency installs but app crashes on widget arguments:
+  Check Streamlit version compatibility between code and `requirements.txt`.
+- Dependency resolution takes the wrong file:
+  Confirm `requirements.txt` contains the runtime dependencies and keep the repo root clean.

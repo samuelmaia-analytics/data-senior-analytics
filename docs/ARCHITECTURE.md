@@ -1,25 +1,27 @@
-﻿# Architecture
+# Architecture
 
 ## Executive Summary
-The project follows a layered analytics architecture to keep business UI concerns separate from data processing and persistence.
+The project follows a layered analytics architecture that separates business presentation, curation logic, exploratory analysis, and persistence. The dashboard is not only a UI shell: it orchestrates a governed path from raw upload to curated, decision-ready output.
 
-## Layered Approach
-- Presentation layer: `dashboard/app.py` and `dashboard/utils/*` for UX, charts, and KPI communication.
-- Application layer: orchestration inside the Streamlit flow (upload, validation, pipeline execution).
-- Domain analytics layer: `src/analysis/exploratory.py` and `src/data/transformer.py` for statistical logic and transformations.
-- Data access layer: `src/data/file_extractor.py` and `src/data/sqlite_manager.py` for ingestion and persistence.
-- Platform/config layer: `config/settings.py`, `config/data_source.yaml`, and validation scripts.
+## Layers
+- Presentation layer: `dashboard/app.py` renders the executive experience, KPI cards, EDA tabs, and persistence flows.
+- Dashboard analytics layer: `dashboard/utils/analytics.py` converts technical profiling into executive metrics such as quality score, priority actions, and board-ready snapshots.
+- Domain analytics layer: `src/analysis/exploratory.py` produces descriptive statistics and automated insights.
+- Data curation layer: `src/data/transformer.py` standardizes columns, infers types, treats missing values, and removes duplicates.
+- Persistence layer: `src/data/sqlite_manager.py` stores curated datasets in SQLite for downstream querying.
+- Platform/config layer: `config/settings.py`, `.streamlit/`, and validation scripts define runtime paths, deployment guardrails, and governance checks.
 
 ## End-to-End Flow
 ```mermaid
 flowchart LR
-    A[Raw CSV/XLSX] --> B[Raw Validation]
-    B --> C[Bronze: Standardized ingest]
-    C --> D[Silver: Cleaned and typed]
-    D --> E[Gold: Business KPIs and aggregates]
-    E --> F[Dashboard + executive insights]
+    A[Raw CSV / XLSX / Demo data] --> B[Streamlit upload or auto-load]
+    B --> C[DataTransformer]
+    C --> D[Curated DataFrame]
+    D --> E[ExploratoryAnalyzer]
+    D --> F[Executive Snapshot + Quality Score]
     D --> G[(SQLite)]
-    E --> G
+    E --> H[EDA tabs + diagnostics]
+    F --> I[Executive summary + board briefing]
 ```
 
 ## Runtime Sequence
@@ -27,25 +29,34 @@ flowchart LR
 sequenceDiagram
     participant U as User
     participant UI as Streamlit UI
-    participant FE as FileExtractor
     participant TR as DataTransformer
     participant AN as ExploratoryAnalyzer
+    participant AU as Dashboard Analytics Utils
     participant DB as SQLiteManager
 
-    U->>UI: Upload CSV/XLSX
-    UI->>FE: Read file
-    FE-->>UI: Raw DataFrame
-    UI->>TR: Clean columns, fill missing, deduplicate
-    TR-->>UI: Silver DataFrame
-    UI->>AN: Analyze + summarize
-    AN-->>UI: Gold-ready metrics/insights
-    UI->>DB: Persist curated outputs
+    U->>UI: Load demo or upload CSV/XLSX
+    UI->>TR: Curate raw DataFrame
+    TR-->>UI: Clean, typed, deduplicated DataFrame
+    UI->>AN: Profile and analyze curated data
+    AN-->>UI: Stats and automated insights
+    UI->>AU: Build quality summary and executive snapshot
+    AU-->>UI: KPI, quality score, priority actions
+    UI->>DB: Persist curated output (optional)
     DB-->>UI: Queryable analytical tables
 ```
 
-## Evidence of Engineering Discipline
+## Dashboard Operating Model
+- `Overview`: executive KPI, quality status, board briefing, top category, top region, revenue trend.
+- `Upload`: raw-to-curated flow, quality gate visibility, and persistence to SQLite.
+- `Data`: curated preview, raw preview, column profile, and transformation log.
+- `EDA`: insights, statistics, missing profile, and strongest correlations.
+- `Visualizations`: distribution, business mix, and trend analysis.
+- `Database`: operational verification of persisted analytical tables.
+- `Settings`: runtime metadata, quality metadata, and transformation count.
+
+## Engineering Discipline
 - CI gate: lint + format + tests + coverage (`>=70%`).
-- Data contract and output contract tests for predictable Gold outputs.
-- ADR folder to document architecture decisions.
-- Structured runtime logs with trace id and per-page timing in dashboard runtime.
-- Data manifest checksum validation to prevent unnoticed dataset drift.
+- Streamlit Cloud preflight and deployment runbook in `docs/STREAMLIT_CLOUD.md`.
+- Structured logs with `trace_id` and per-page elapsed time.
+- Data provenance and manifest checks to prevent silent drift.
+- ADRs to document major architectural decisions.

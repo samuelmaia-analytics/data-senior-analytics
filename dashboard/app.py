@@ -21,7 +21,9 @@ if str(ROOT_DIR) not in sys.path:
 from config.settings import Settings  # noqa: E402
 from dashboard.utils.analytics import (  # noqa: E402
     build_data_quality_summary,
+    build_executive_snapshot,
     build_priority_actions,
+    summarize_correlation_pairs,
     summarize_transformation_log,
 )
 from src.analysis.exploratory import ExploratoryAnalyzer  # noqa: E402
@@ -57,7 +59,10 @@ def apply_executive_style() -> None:
                 font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
             }
             .stApp {
-                background: linear-gradient(180deg, #f5f7fa 0%, #eef2f7 100%);
+                background:
+                    radial-gradient(circle at top left, rgba(11, 78, 110, 0.14), transparent 26%),
+                    radial-gradient(circle at top right, rgba(180, 83, 9, 0.16), transparent 22%),
+                    linear-gradient(180deg, #f8fbfd 0%, #eef3f7 100%);
             }
             .main .block-container {
                 max-width: 1240px;
@@ -68,8 +73,8 @@ def apply_executive_style() -> None:
                 padding: 1rem 1.2rem;
                 border: 1px solid #d8dee8;
                 border-radius: 12px;
-                background: #ffffff;
-                box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+                background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+                box-shadow: 0 8px 28px rgba(15, 23, 42, 0.08);
                 margin-bottom: 0.8rem;
             }
             .hero-title {
@@ -85,11 +90,11 @@ def apply_executive_style() -> None:
                 font-size: 0.95rem;
             }
             div[data-testid="stMetric"] {
-                background: #ffffff;
+                background: rgba(255, 255, 255, 0.92);
                 border: 1px solid #d8dee8;
                 border-radius: 12px;
                 padding: 0.45rem 0.7rem;
-                box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+                box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
             }
             div[role="radiogroup"] > label {
                 border: 1px solid #d8dee8;
@@ -129,6 +134,34 @@ def apply_executive_style() -> None:
                 color: #334155;
                 font-size: 0.75rem;
                 font-weight: 600;
+            }
+            .board-card {
+                padding: 1rem 1.05rem;
+                border-radius: 16px;
+                border: 1px solid #d5dee8;
+                background: linear-gradient(160deg, rgba(255,255,255,0.96) 0%, rgba(248,250,252,0.92) 100%);
+                box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+                min-height: 168px;
+            }
+            .board-kicker {
+                margin: 0 0 0.45rem 0;
+                color: #0b4e6e;
+                font-size: 0.75rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+            }
+            .board-title {
+                margin: 0 0 0.45rem 0;
+                color: #0f172a;
+                font-size: 1.1rem;
+                font-weight: 760;
+            }
+            .board-copy {
+                margin: 0;
+                color: #475569;
+                font-size: 0.92rem;
+                line-height: 1.45;
             }
         </style>
         """,
@@ -173,6 +206,22 @@ def get_build_id() -> str:
     except Exception:  # noqa: BLE001
         pass
     return "unknown"
+
+
+def format_currency(value: float | None) -> str:
+    if value is None:
+        return "N/A"
+    return f"${value:,.2f}"
+
+
+def format_compact_number(value: float | int | None) -> str:
+    if value is None:
+        return "N/A"
+    if abs(float(value)) >= 1_000_000:
+        return f"{float(value) / 1_000_000:.1f}M"
+    if abs(float(value)) >= 1_000:
+        return f"{float(value) / 1_000:.1f}K"
+    return f"{float(value):,.0f}"
 
 
 def prepare_dataset(df: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, Any], list[dict[str, Any]]]:
@@ -290,6 +339,7 @@ def render_home(
     priority_actions: list[str],
 ) -> None:
     st.subheader("Executive Summary")
+    executive_snapshot = build_executive_snapshot(df) if df is not None and not df.empty else None
 
     c1, c2, c3, c4 = st.columns(4)
     with c1:
@@ -301,6 +351,17 @@ def render_home(
         st.metric("Quality status", status)
     with c4:
         st.metric("SQLite tables", len(db.list_tables()))
+
+    if executive_snapshot:
+        k1, k2, k3, k4 = st.columns(4)
+        with k1:
+            st.metric("Revenue", format_currency(executive_snapshot["revenue"]))
+        with k2:
+            st.metric("Average ticket", format_currency(executive_snapshot["avg_ticket"]))
+        with k3:
+            st.metric("Unique clients", format_compact_number(executive_snapshot["unique_clients"]))
+        with k4:
+            st.metric("Items sold", format_compact_number(executive_snapshot["items_sold"]))
 
     left, right = st.columns(2)
     with left:
@@ -356,6 +417,52 @@ def render_home(
             st.markdown('<span class="exec-pill">Action</span>', unsafe_allow_html=True)
             st.write(action_msg)
 
+    if executive_snapshot:
+        st.markdown("### Board Briefing")
+        b1, b2, b3 = st.columns(3)
+        with b1:
+            st.markdown(
+                f"""
+                <div class="board-card">
+                    <p class="board-kicker">Commercial Focus</p>
+                    <h3 class="board-title">Top category: {executive_snapshot['top_category'] or 'N/A'}</h3>
+                    <p class="board-copy">
+                        Revenue concentration is currently led by the strongest category. Use this signal to prioritize portfolio
+                        defense, pricing actions, and cross-sell strategy.
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with b2:
+            st.markdown(
+                f"""
+                <div class="board-card">
+                    <p class="board-kicker">Regional Signal</p>
+                    <h3 class="board-title">Top region: {executive_snapshot['top_region'] or 'N/A'}</h3>
+                    <p class="board-copy">
+                        Regional mix identifies where commercial momentum is strongest and where leadership should inspect execution
+                        variance, service quality, or distribution gaps.
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with b3:
+            st.markdown(
+                f"""
+                <div class="board-card">
+                    <p class="board-kicker">Governance Readiness</p>
+                    <h3 class="board-title">{quality_summary['status'] if quality_summary else 'No data'}</h3>
+                    <p class="board-copy">
+                        The current quality score is {quality_summary['quality_score']:.0f}/100.
+                        This is the release signal for whether the dataset is ready for executive consumption.
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
     st.markdown("### Automated Curation Highlights")
     d1, d2 = st.columns(2)
     with d1:
@@ -391,14 +498,9 @@ def render_home(
         for insight in analysis.get("insights", [])[:4]:
             st.write(f"- {insight}")
 
-    if df is not None and not df.empty and {"categoria", "valor_total"}.issubset(df.columns):
-        category_revenue = (
-            df.groupby("categoria", dropna=False)["valor_total"]
-            .sum()
-            .sort_values(ascending=False)
-            .head(10)
-            .reset_index()
-        )
+    if executive_snapshot and not executive_snapshot["revenue_by_category"].empty:
+        chart_left, chart_right = st.columns([1.3, 1])
+        category_revenue = executive_snapshot["revenue_by_category"].head(10)
         fig = px.bar(
             category_revenue,
             x="valor_total",
@@ -408,7 +510,23 @@ def render_home(
             labels={"categoria": "product_category", "valor_total": "revenue"},
         )
         fig.update_layout(yaxis={"categoryorder": "total ascending"})
-        st.plotly_chart(fig, width="stretch")
+        with chart_left:
+            st.plotly_chart(fig, width="stretch")
+
+        with chart_right:
+            trend_df = executive_snapshot["revenue_trend"]
+            if isinstance(trend_df, pd.DataFrame) and not trend_df.empty:
+                trend_fig = px.line(
+                    trend_df,
+                    x="data",
+                    y="valor_total",
+                    markers=True,
+                    title="Revenue Trend",
+                    labels={"data": "date", "valor_total": "revenue"},
+                )
+                st.plotly_chart(trend_fig, width="stretch")
+            else:
+                st.info("Revenue trend is not available for the current dataset.")
 
 
 def render_upload(db: SQLiteManager, quality_summary: dict[str, Any] | None) -> None:
@@ -599,6 +717,10 @@ def render_eda(
             corr = numeric.corr(numeric_only=True)
             fig = px.imshow(corr, text_auto=True, aspect="auto", title="Correlation Matrix")
             st.plotly_chart(fig, width="stretch")
+            strongest_pairs = summarize_correlation_pairs(df)
+            if not strongest_pairs.empty:
+                st.caption("Strongest relationships")
+                st.dataframe(strongest_pairs, width="stretch")
         else:
             st.info("At least 2 numeric columns are required.")
 
@@ -626,30 +748,59 @@ def render_charts(df: pd.DataFrame | None) -> None:
     numeric_cols = df.select_dtypes(include="number").columns.tolist()
     cat_cols = df.select_dtypes(include=["object", "category"]).columns.tolist()
 
-    if numeric_cols:
-        col = st.selectbox("Numeric variable", numeric_cols, key="chart_numeric_variable")
-        fig = px.histogram(df, x=col, nbins=30, title=f"Distribution: {col}")
-        st.plotly_chart(fig, width="stretch")
+    tabs = st.tabs(["Distribution", "Business Mix", "Trend"])
 
-    if cat_cols and numeric_cols:
-        left, right = st.columns(2)
-        with left:
-            cat = st.selectbox("Category", cat_cols, key="chart_category")
-        with right:
-            val = st.selectbox(
-                "Metric",
-                numeric_cols,
-                index=min(1, len(numeric_cols) - 1),
-                key="chart_metric",
+    with tabs[0]:
+        if numeric_cols:
+            col = st.selectbox("Numeric variable", numeric_cols, key="chart_numeric_variable")
+            fig = px.histogram(df, x=col, nbins=30, title=f"Distribution: {col}")
+            st.plotly_chart(fig, width="stretch")
+        else:
+            st.info("No numeric columns available.")
+
+    with tabs[1]:
+        if cat_cols and numeric_cols:
+            left, right = st.columns(2)
+            with left:
+                cat = st.selectbox("Category", cat_cols, key="chart_category")
+            with right:
+                val = st.selectbox(
+                    "Metric",
+                    numeric_cols,
+                    index=min(1, len(numeric_cols) - 1),
+                    key="chart_metric",
+                )
+            grouped = (
+                df.groupby(cat, dropna=False)[val]
+                .mean()
+                .reset_index()
+                .sort_values(val, ascending=False)
             )
-        grouped = (
-            df.groupby(cat, dropna=False)[val]
-            .mean()
-            .reset_index()
-            .sort_values(val, ascending=False)
-        )
-        fig = px.bar(grouped.head(15), x=cat, y=val, title=f"Average {val} by {cat}")
-        st.plotly_chart(fig, width="stretch")
+            fig = px.bar(grouped.head(15), x=cat, y=val, title=f"Average {val} by {cat}")
+            st.plotly_chart(fig, width="stretch")
+        else:
+            st.info("Category and numeric columns are required.")
+
+    with tabs[2]:
+        if {"data", "valor_total"}.issubset(df.columns):
+            trend_df = (
+                df.assign(data=pd.to_datetime(df["data"], errors="coerce"))
+                .dropna(subset=["data"])
+                .groupby("data", dropna=False)["valor_total"]
+                .sum()
+                .reset_index()
+                .sort_values("data")
+            )
+            trend_fig = px.area(
+                trend_df,
+                x="data",
+                y="valor_total",
+                title="Revenue over time",
+                labels={"data": "date", "valor_total": "revenue"},
+            )
+            st.plotly_chart(trend_fig, width="stretch")
+        else:
+            st.info("Trend view requires `data` and `valor_total` columns.")
 
 
 def render_database(db: SQLiteManager) -> None:

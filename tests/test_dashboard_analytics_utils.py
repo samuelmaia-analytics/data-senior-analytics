@@ -2,10 +2,12 @@ import pandas as pd
 
 from dashboard.utils.analytics import (
     build_data_quality_summary,
+    build_executive_snapshot,
     build_priority_actions,
     detect_column_types,
     get_basic_stats,
     interpret_correlation,
+    summarize_correlation_pairs,
     summarize_transformation_log,
 )
 
@@ -96,3 +98,42 @@ def test_summarize_transformation_log_generates_readable_messages():
     assert any("Column standardization" in item for item in summary)
     assert any("Missing values reduced" in item for item in summary)
     assert any("Duplicate removal" in item for item in summary)
+
+
+def test_build_executive_snapshot_extracts_business_kpis():
+    df = pd.DataFrame(
+        {
+            "data": ["2025-01-01", "2025-01-02", "2025-01-03"],
+            "categoria": ["A", "B", "A"],
+            "regiao": ["Sul", "Norte", "Sul"],
+            "cliente_id": [101, 102, 101],
+            "quantidade": [3, 5, 2],
+            "desconto": [0, 10, 5],
+            "valor_total": [100.0, 250.0, 200.0],
+        }
+    )
+
+    snapshot = build_executive_snapshot(df)
+
+    assert snapshot["revenue"] == 550.0
+    assert round(float(snapshot["avg_ticket"]), 2) == round(550.0 / 3, 2)
+    assert snapshot["unique_clients"] == 2
+    assert snapshot["top_category"] == "A"
+    assert snapshot["top_region"] == "Sul"
+    assert not snapshot["revenue_trend"].empty
+
+
+def test_summarize_correlation_pairs_returns_sorted_pairs():
+    df = pd.DataFrame(
+        {
+            "sales": [10, 20, 30, 40, 50],
+            "margin": [1, 2, 3, 4, 5],
+            "discount": [5, 4, 3, 2, 1],
+        }
+    )
+
+    pairs = summarize_correlation_pairs(df, top_n=2)
+
+    assert len(pairs) == 2
+    assert pairs.iloc[0]["strength"] in {"Muito Forte", "Forte", "Moderada", "Fraca"}
+    assert abs(float(pairs.iloc[0]["correlation"])) >= abs(float(pairs.iloc[1]["correlation"]))

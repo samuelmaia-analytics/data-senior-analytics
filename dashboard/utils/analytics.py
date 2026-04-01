@@ -177,3 +177,107 @@ def summarize_transformation_log(log: list[dict]) -> list[str]:
             summary.append("Feature generation step executed.")
 
     return summary
+
+
+def build_executive_snapshot(df: pd.DataFrame) -> dict[str, object]:
+    """Build a board-ready snapshot from the curated dataset."""
+    snapshot: dict[str, object] = {
+        "revenue": None,
+        "orders": int(len(df)),
+        "unique_clients": None,
+        "avg_ticket": None,
+        "avg_discount": None,
+        "items_sold": None,
+        "top_category": None,
+        "top_region": None,
+        "revenue_by_category": pd.DataFrame(),
+        "revenue_by_region": pd.DataFrame(),
+        "revenue_trend": pd.DataFrame(),
+    }
+
+    if "valor_total" in df.columns:
+        snapshot["revenue"] = float(df["valor_total"].sum())
+        snapshot["avg_ticket"] = float(df["valor_total"].mean())
+
+    if "cliente_id" in df.columns:
+        snapshot["unique_clients"] = int(df["cliente_id"].nunique(dropna=True))
+
+    if "desconto" in df.columns:
+        snapshot["avg_discount"] = float(df["desconto"].mean())
+
+    if "quantidade" in df.columns:
+        snapshot["items_sold"] = float(df["quantidade"].sum())
+
+    if {"categoria", "valor_total"}.issubset(df.columns):
+        revenue_by_category = (
+            df.groupby("categoria", dropna=False)["valor_total"]
+            .sum()
+            .sort_values(ascending=False)
+            .reset_index()
+        )
+        snapshot["revenue_by_category"] = revenue_by_category
+        if not revenue_by_category.empty:
+            snapshot["top_category"] = str(revenue_by_category.iloc[0]["categoria"])
+
+    if {"regiao", "valor_total"}.issubset(df.columns):
+        revenue_by_region = (
+            df.groupby("regiao", dropna=False)["valor_total"]
+            .sum()
+            .sort_values(ascending=False)
+            .reset_index()
+        )
+        snapshot["revenue_by_region"] = revenue_by_region
+        if not revenue_by_region.empty:
+            snapshot["top_region"] = str(revenue_by_region.iloc[0]["regiao"])
+
+    if {"data", "valor_total"}.issubset(df.columns):
+        date_series = pd.to_datetime(df["data"], errors="coerce")
+        trend_df = df.assign(_data=date_series).dropna(subset=["_data"])
+        if not trend_df.empty:
+            revenue_trend = (
+                trend_df.groupby("_data", dropna=False)["valor_total"]
+                .sum()
+                .reset_index()
+                .rename(columns={"_data": "data"})
+                .sort_values("data")
+            )
+            snapshot["revenue_trend"] = revenue_trend
+
+    return snapshot
+
+
+def summarize_correlation_pairs(df: pd.DataFrame, top_n: int = 5) -> pd.DataFrame:
+    """Return the strongest correlation pairs for executive review."""
+    numeric_df = df.select_dtypes(include=[np.number])
+    if numeric_df.shape[1] < 2:
+        return pd.DataFrame(columns=["left", "right", "correlation", "strength"])
+
+    corr_matrix = numeric_df.corr(numeric_only=True)
+    rows: list[dict[str, object]] = []
+
+    for i, left in enumerate(corr_matrix.columns):
+        for j, right in enumerate(corr_matrix.columns):
+            if j <= i:
+                continue
+            corr_value = float(corr_matrix.iloc[i, j])
+            strength, _ = interpret_correlation(corr_value)
+            rows.append(
+                {
+                    "left": left,
+                    "right": right,
+                    "correlation": round(corr_value, 4),
+                    "strength": strength,
+                }
+            )
+
+    if not rows:
+        return pd.DataFrame(columns=["left", "right", "correlation", "strength"])
+
+    return (
+        pd.DataFrame(rows)
+        .assign(abs_correlation=lambda frame: frame["correlation"].abs())
+        .sort_values("abs_correlation", ascending=False)
+        .drop(columns="abs_correlation")
+        .head(top_n)
+        .reset_index(drop=True)
+    )
