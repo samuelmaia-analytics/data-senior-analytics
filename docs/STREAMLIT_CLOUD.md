@@ -14,7 +14,7 @@
 ## Important Operational Lessons
 - If the app was originally created with the wrong Python version, redeploy alone may not be enough.
 - If Streamlit Cloud keeps using the wrong Python runtime, delete the app and recreate it with `Python 3.11`.
-- Prefer a single dependency source for the app. This repository uses `requirements.txt`, even though `pyproject.toml` exists for local tooling configuration.
+- Prefer a single dependency source for the app. This repository keeps runtime dependencies only in `requirements.txt`; tooling config lives in dedicated files such as `pytest.ini`, `ruff.toml`, `.coveragerc`, and `mypy.ini`.
 
 ## App Creation Settings
 - Repository: `samuelmaia-analytics/data-senior-analytics`

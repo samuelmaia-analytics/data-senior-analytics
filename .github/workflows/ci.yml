@@ -40,7 +40,7 @@ jobs:
 
       - name: Black format check
         id: black
-        run: black --check src config scripts dashboard tests
+        run: black --line-length 100 --target-version py311 --check src config scripts dashboard tests
 
       - name: Run tests with coverage
         id: tests

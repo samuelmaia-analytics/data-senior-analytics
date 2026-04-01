@@ -15,7 +15,7 @@ install-dev:
 
 lint:
 	python -m ruff check src config scripts dashboard tests
-	python -m black --check src config scripts dashboard tests
+	python -m black --line-length 100 --target-version py311 --check src config scripts dashboard tests
 
 test:
 	python -m pytest
@@ -34,7 +34,7 @@ quality: lint test preflight
 
 format:
 	python -m ruff format src config scripts dashboard tests
-	python -m black src config scripts dashboard tests
+	python -m black --line-length 100 --target-version py311 src config scripts dashboard tests
 
 manifest:
 	python scripts/generate_data_manifest.py
