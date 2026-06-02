@@ -8,8 +8,8 @@
 
 ## Operational Principles
 - Keep exactly one runtime dependency source for the deployed app.
-- Treat Python version as a deployment contract, not as a best-effort preference.
-- Validate the dashboard as a product surface after each deploy, not only dependency installation.
+- Treat Python version as a deployment contract.
+- Validate the dashboard as an analytical product surface after each deploy, not only dependency installation.
 
 ## Repository Readiness
 - Keep `.streamlit/config.toml` at the repository root.
@@ -49,3 +49,7 @@ python scripts/generate_data_manifest.py --check
   Check Streamlit API compatibility between the deployed version and the codebase.
 - Streamlit Cloud warns about multiple dependency sources:
   The repository should expose runtime dependencies only through `requirements.txt`.
+
+## Portfolio Note
+- This deployment guide documents a practical cloud workflow for portfolio presentation.
+- It should be adapted for each real production environment and team policy.

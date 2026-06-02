@@ -1,101 +1,59 @@
 # Data Analytics Workflow
 
-[Versão em Português](README.md)
+[Versao em Portugues](README.md)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/samuelmaia-analytics/data-senior-analytics/ci.yml?branch=main&label=CI)](https://github.com/samuelmaia-analytics/data-senior-analytics/actions/workflows/ci.yml)
 [![Python 3.11](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-Live_App-FF4B4B?logo=streamlit&logoColor=white)](https://data-analytics-sr.streamlit.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-0f172a.svg)](LICENSE)
 
-Analytics project that turns tabular files into a curated, traceable, decision-ready workflow with a Streamlit dashboard, SQLite persistence, quality indicators, and technical documentation.
+Portfolio analytics project that turns tabular files into a practical analytical workflow: ingestion, data cleaning, quality scoring, dashboard analysis, and SQLite persistence.
 
 Live demo: https://data-analytics-sr.streamlit.app
 
-## Project goal
+Note: the public repository name may be updated in the future to better reflect the current project positioning.
 
-This project demonstrates practical foundations in data analysis, BI, and analytics engineering: receiving raw data, applying treatment, validating quality, generating indicators, and delivering a clear business-oriented view.
+## Project summary
+This project was built to present a business-oriented analytics workflow with documentation, data quality checks, and practical governance foundations.
 
-This repository uses a layered approach:
-- raw intake via CSV/XLSX or demo datasets;
-- automated curation with standardization, dtype inference, null handling, and deduplication;
-- versioned scoring and action policy in `config/dashboard_policy.json`;
-- business-facing consumption through KPIs, data quality, trends, and priority actions;
-- persistence of curated datasets into SQLite;
-- good practices with lint, tests, coverage, deploy preflight, and traceability.
+## Business problem
+Business teams often receive spreadsheets with inconsistent structure and need fast answers:
+- is this data reliable enough for analysis?
+- where are the main revenue and concentration signals?
+- what action should come first before sharing findings?
 
-## Use case
-
-The dashboard is designed for scenarios where a team needs fast answers:
-- is the dataset reliable enough for analysis?
-- which indicators need attention?
-- are there missing, duplicated, or inconsistent records?
-- what should be done before sharing or persisting the dataset?
+## Proposed solution
+The repository applies a layered workflow:
+- CSV/XLSX or demo dataset intake
+- automated curation and standardization
+- quality score and practical action suggestions
+- Streamlit analytical view (KPI, EDA, trends, concentration)
+- optional SQLite persistence with retention and privacy metadata
 
 ## Skills demonstrated
+- business-oriented analytics
+- data quality and data documentation practices
+- practical analytical workflow with reproducible steps
+- dashboard communication for decision support
+- testing, linting, and CI foundations
+- work style aligned with Junior Data Analyst, Data Analyst, BI Analyst, and early/intermediate Analytics Engineer paths
 
-- Data treatment and validation with Python/Pandas.
-- Analytical dashboard development with Streamlit.
-- Code organization into reusable layers.
-- Indicators, quality scoring, and business-oriented interpretation.
-- Local persistence with SQLite.
-- Technical documentation, automated tests, and CI/CD.
-- Governance, traceability, and basic privacy-aware data handling.
+## Technical stack
+- `Python`, `Pandas`, `NumPy`
+- `Streamlit`, `Plotly`
+- `SQLite`
+- `Pytest`, `Ruff`, `Black`, `GitHub Actions`
 
-## What the dashboard delivers
+## Dashboard features
+- `Overview`: KPI, decision risk, confidence, and next actions
+- `Upload`: data upload plus automated curation
+- `Data`: raw vs curated comparison
+- `EDA`: statistics, correlation, and missing profile
+- `Visualizations`: distribution, business mix, and trend analysis
+- `Database`: persisted dataset catalog and inspection
+- `Settings`: runtime and governance metadata
 
-- `Overview`: dataset summary, indicators, quality, risk, and next steps.
-- `Upload`: CSV/XLSX ingestion with automated curation and immediate quality scoring.
-- `Data`: raw vs curated comparison, with masked previews when personal data is detected.
-- `EDA`: statistics, correlation, automated insights, and missing-value profile.
-- `Visualizations`: distribution, business mix, and trend analysis.
-- `Database`: operational verification of the curated dataset persisted in SQLite.
-- `Settings`: runtime, quality, governance, and transformation metadata.
-
-## End-to-end flow
-
-1. The user uploads CSV/XLSX or loads a demo dataset.
-2. The app applies `DataTransformer` to build a curated version.
-3. `ExploratoryAnalyzer` produces statistics and automated insights.
-4. `dashboard/utils/analytics.py` converts profiling into briefing, governance, concentration, and a decision-oriented narrative.
-5. The user can persist the curated dataset into SQLite.
-
-## Architecture
-
-```mermaid
-flowchart LR
-    A[CSV / XLSX / Demo data] --> B[Streamlit Upload]
-    B --> C[DataTransformer]
-    C --> D[Curated DataFrame]
-    D --> E[ExploratoryAnalyzer]
-    D --> F[Business Snapshot + Quality Score]
-    D --> G[(SQLite)]
-    E --> H[EDA + Diagnostics]
-    F --> I[Decision Dashboard]
-```
-
-Related documentation:
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- [docs/STREAMLIT_CLOUD.md](docs/STREAMLIT_CLOUD.md)
-- [docs/DATA_CONTRACT.md](docs/DATA_CONTRACT.md)
-- [docs/DATA_LINEAGE.md](docs/DATA_LINEAGE.md)
-- [docs/DATA_PROVENANCE.md](docs/DATA_PROVENANCE.md)
-
-## Screenshots / Demo
-
-![Dashboard Preview](assets/images/dashboard-preview.png)
-![Dashboard Insight View](assets/images/Screenshot_2.png)
-![Dashboard Walkthrough](assets/images/dashboard-walkthrough.gif)
-
-## Stack
-
-- `streamlit` for dashboard and user experience
-- `pandas` and `numpy` for transformation and profiling
-- `plotly` for analytical visualization
-- `sqlite3` via `SQLiteManager` for persistence
-- `ruff`, `black`, `pytest`, and `pytest-cov` for code quality
-
-## Local run
-
+## Run locally
 ```bash
 git clone https://github.com/samuelmaia-analytics/data-senior-analytics.git
 cd data-senior-analytics
@@ -111,33 +69,32 @@ pip install -r requirements-dev.txt
 python -m streamlit run dashboard/app.py
 ```
 
-## Quality and operations
+## Tests
+```bash
+python -m pytest
+```
 
-- CI with lint, format, tests, and coverage.
-- Coverage gate at `>=70%`.
-- Streamlit Cloud preflight checks.
-- Encoding, provenance, and data manifest validation.
-- Basic governance and privacy controls for personal data in previews and persistence.
-- Persistence registry and audit trail in SQLite.
-- Schedulable retention purge script and governed export with audit.
-- Deployment runtime aligned on `Python 3.11`.
-- Dashboard smoke tests as part of product-surface validation.
+## Demo link
+- https://data-analytics-sr.streamlit.app
 
-## Repository structure
+## For recruiters and tech leads
+This repository is positioned for opportunities such as:
+- Junior Data Analyst / Data Analyst
+- Junior BI Analyst / BI Analyst
+- early/intermediate Analytics Engineer
+- freelance data projects and remote data opportunities
 
-- `dashboard/`: Streamlit interface and user experience composition
-- `src/app/`: application services and curated workflow orchestration
-- `src/analysis/`: automated exploratory analysis
-- `src/data/`: curation, ingestion, and persistence
-- `config/`: paths and runtime metadata
-- `docs/`: architecture, deployment, and governance
-- `docs/LGPD_GOVERNANCE.md`: practical privacy interpretation applied to the analytics workflow
-- `tests/`: automated behavior protection
+## What this project demonstrates
+- clear translation from business question to analytical workflow
+- data quality controls and traceable documentation
+- practical dashboard delivery with stakeholder-ready communication
+- governance simulation and privacy-aware handling as portfolio good practices
 
-## For recruiters and leads
-
-This project demonstrates readiness to contribute to data analysis, BI, analytical automation, and business-support initiatives. It is suitable for conversations about Data Analyst, BI Analyst, early/intermediate Analytics Engineer, or freelance data organization and visualization projects.
+## Future improvements
+- add connectors for APIs and external databases
+- expand contract tests for additional scenarios
+- publish use-case variants (sales, retention, operations)
+- extend quality and observability automation
 
 ## License
-
 Licensed under MIT. See [LICENSE](LICENSE).

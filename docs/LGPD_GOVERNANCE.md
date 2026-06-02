@@ -1,7 +1,7 @@
 # LGPD Governance
 
 ## Scope
-This project now applies basic privacy governance controls for analytics workflows that may receive personal data through uploads.
+This project applies basic privacy governance controls for analytics workflows that may receive personal data through uploads.
 
 ## What Is Enforced in the Product
 - Detection of likely personal, quasi-identifying, and sensitive columns based on column names and content patterns.
@@ -30,6 +30,10 @@ It provides engineering controls that support a privacy-by-design posture, but l
 - SQLite persistence is treated as a control point, not a neutral storage action.
 - Governance metadata should accompany analytical quality metadata.
 - Retention must be explicit at persistence time, not inferred after the fact.
+
+## Portfolio Positioning
+- These controls are presented as a governance simulation and applied fundamentals.
+- They are useful for technical review, but they are not a full legal compliance program.
 
 ## References
 - Brazil LGPD official text: Lei nº 13.709/2018, especially Articles 5 and 6.

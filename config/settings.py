@@ -1,6 +1,6 @@
 # config/settings.py
 """
-Configurações do projeto Data Senior Analytics
+Configuracoes do projeto Data Analytics Workflow
 """
 
 from pathlib import Path

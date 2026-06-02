@@ -10,6 +10,8 @@ This folder consolidates the technical, operational, and governance narrative be
 5. [DATA_LINEAGE.md](DATA_LINEAGE.md)
 6. [LGPD_GOVERNANCE.md](LGPD_GOVERNANCE.md)
 7. [RETENTION_RUNBOOK.md](RETENTION_RUNBOOK.md)
+8. [RECRUITER_POSITIONING.md](RECRUITER_POSITIONING.md)
+9. [RENAME_RECOMMENDATION.md](RENAME_RECOMMENDATION.md)
 
 ## Core Documents
 - [ARCHITECTURE.md](ARCHITECTURE.md): layered design, operating model, and system flow.
@@ -19,6 +21,8 @@ This folder consolidates the technical, operational, and governance narrative be
 - [DATA_LINEAGE.md](DATA_LINEAGE.md): reproducibility strategy and manifest-based lineage tracking.
 - [LGPD_GOVERNANCE.md](LGPD_GOVERNANCE.md): privacy controls, masking, and LGPD-oriented engineering posture.
 - [RETENTION_RUNBOOK.md](RETENTION_RUNBOOK.md): operational retention flow, purge behavior, and review steps.
+- [RECRUITER_POSITIONING.md](RECRUITER_POSITIONING.md): interview-ready project positioning for recruiters and leads.
+- [RENAME_RECOMMENDATION.md](RENAME_RECOMMENDATION.md): recommended repository rename and migration checklist.
 
 ## What Changed in the Current Product Surface
 - The dashboard now exposes a decision brief, trust level, and release posture in `Overview`.

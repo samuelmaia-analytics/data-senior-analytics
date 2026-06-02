@@ -4,7 +4,7 @@
 Accepted
 
 ## Context
-Executive credibility requires traceable real-world data sources.
+Technical credibility requires traceable real-world data sources.
 
 ## Decision
 Enforce dataset provenance metadata in `config/data_source.yaml` and validate in CI.

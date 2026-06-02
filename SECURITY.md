@@ -8,7 +8,7 @@ Please do not open public issues for potential vulnerabilities.
 
 Send details to:
 - Email: `smaia2@gmail.com`
-- Subject: `Security Report - data-senior-analytics`
+- Subject: `Security Report - data-analytics-workflow`
 
 Include:
 - Affected file/module

@@ -47,7 +47,7 @@ PAGE_OPTIONS = [
 ]
 
 st.set_page_config(
-    page_title="Data Senior Analytics",
+    page_title="Data Analytics Workflow",
     page_icon="DA",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -389,9 +389,9 @@ def ensure_session_defaults() -> None:
 def render_header(df: pd.DataFrame | None, quality_summary: dict[str, Any] | None) -> None:
     st.markdown(
         """
-        <div class="hero">
-            <h1 class="hero-title">Data Senior Analytics</h1>
-            <p class="hero-subtitle">Dashboard for diagnostics, curation, exploration, and decision support.</p>
+            <div class="hero">
+            <h1 class="hero-title">Data Analytics Workflow</h1>
+            <p class="hero-subtitle">Dashboard for diagnostics, curation, exploration, and business-oriented decision support.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -399,7 +399,7 @@ def render_header(df: pd.DataFrame | None, quality_summary: dict[str, Any] | Non
 
     c1, c2, c3, c4 = st.columns([1, 1, 2, 1])
     with c1:
-        st.metric("Environment", "Production")
+        st.metric("Environment", "Portfolio Demo")
     with c2:
         st.metric("Build", get_build_id())
     with c3:
@@ -516,7 +516,7 @@ def render_home(
         st.markdown(
             f"""
             <div class="signal-card">
-                <p class="signal-kicker">Leadership view</p>
+                <p class="signal-kicker">Business view</p>
                 <h3 class="signal-title">{decision_brief['headline']}</h3>
                 <p class="signal-copy">{decision_brief['primary_concern']}</p>
             </div>
@@ -655,14 +655,14 @@ def render_home(
             st.write("- Structured logging with trace id and page timing.")
             st.write("- Tests, lint, preflight, and provenance gates remain active.")
 
-    maturity = quality_summary["quality_score"] if quality_summary else 0
-    st.markdown("### Analytics Maturity")
+    readiness = quality_summary["quality_score"] if quality_summary else 0
+    st.markdown("### Analytics Readiness")
     m1, m2, m3 = st.columns(3)
     with m1:
         st.caption("Data Reliability")
-        st.progress(int(min(100, maturity)))
+        st.progress(int(min(100, readiness)))
     with m2:
-        st.caption("Production Readiness")
+        st.caption("Workflow Readiness")
         st.progress(90)
     with m3:
         st.caption("Decision Clarity")

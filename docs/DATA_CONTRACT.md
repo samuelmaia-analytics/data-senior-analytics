@@ -1,7 +1,8 @@
 # Data Contract
 
 ## Objective
-Define the minimum guarantees expected across `raw`, `bronze`, `silver`, and `gold` layers so downstream analysis, persistence, and decision reporting remain stable.
+Define minimum guarantees across `raw`, `bronze`, `silver`, and `gold` layers so downstream analysis, persistence, and reporting stay stable.
+This is a practical contract for a portfolio analytics workflow.
 
 ## Layer Guarantees
 
@@ -47,3 +48,7 @@ Define the minimum guarantees expected across `raw`, `bronze`, `silver`, and `go
 - Unit tests validate Gold schema and quality constraints.
 - CI blocks merges when contract checks fail.
 - The contract is intentionally strict at the Gold layer and intentionally lighter upstream.
+
+## Practical Scope
+- This contract documents good engineering practices applied in a portfolio project.
+- It helps keep analytical outputs consistent, but it is not a legal or regulatory certification artifact.

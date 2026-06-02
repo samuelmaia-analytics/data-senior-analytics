@@ -31,4 +31,4 @@ Define how retained datasets are tracked, reviewed, and removed from SQLite.
 - Keep retention short for uploaded datasets that contain personal or sensitive data.
 
 ## Limitation
-The current purge is triggered by app execution. A production-grade setup should also run the same policy through a scheduled job.
+The current purge is triggered by app execution. A full production environment should also run the same policy through a scheduled job.

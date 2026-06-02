@@ -1,6 +1,6 @@
 # config/config.yaml
 project:
-  name: "Data Senior Analytics"
+  name: "Data Analytics Workflow"
   version: "1.0.0"
   author: "Samuel Maia"
 

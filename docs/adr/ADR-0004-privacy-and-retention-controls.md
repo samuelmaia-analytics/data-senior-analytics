@@ -27,7 +27,7 @@ The project adopts the following controls:
 - Privacy risk becomes visible in the product surface.
 - Persistence is governed by metadata rather than left implicit.
 - Retention becomes operational instead of merely documented.
-- The repository signals stronger engineering maturity for analytics governance.
+- The repository documents practical governance fundamentals for analytics workflows.
 
 ### Negative
 - Detection is heuristic and can produce false positives or false negatives.

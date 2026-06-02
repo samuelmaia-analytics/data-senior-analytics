@@ -1,24 +1,24 @@
 # Architecture
 
 ## Summary
-The project uses a layered analytics architecture to turn raw tabular inputs into curated, decision-ready outputs. The Streamlit dashboard is the product surface, but the design intentionally separates curation, profiling, business scoring, governance signaling, persistence, and operational controls.
+This portfolio project uses a layered analytics organization to turn raw tabular inputs into curated outputs for business-oriented analysis. The Streamlit dashboard is the main user surface, while curation, profiling, scoring, persistence, and documentation are kept in separate modules.
 
 ## Architectural Intent
-- Preserve a clean boundary between UI concerns and analytical workflow orchestration.
-- Convert data quality into explicit release and decision signals.
+- Keep a clear boundary between UI code and analytical workflow code.
+- Turn data quality signals into practical decision support.
 - Keep curation reusable outside the dashboard.
-- Make deployment and governance first-class parts of the system.
-- Expose decision risk, confidence, and release posture directly in the UI.
+- Apply governance fundamentals in a practical workflow.
+- Document the flow so recruiters and tech leads can review implementation quality.
 
 ## Layers
-- Presentation layer: `dashboard/app.py` renders the interface, KPI surfaces, EDA tabs, and persistence actions.
+- Presentation layer: `dashboard/app.py` renders KPI views, EDA tabs, and persistence actions.
 - Dashboard analytics layer: `dashboard/utils/analytics.py` translates profiling into quality score, priority actions, business snapshot, governance snapshot, decision brief, and correlation summaries.
-- Application service layer: `src/app/curation_service.py` orchestrates curation, profiling, scoring, and business metadata generation.
+- Application service layer: `src/app/curation_service.py` orchestrates curation, profiling, and metadata generation.
 - Privacy guard layer: `src/app/privacy_guard.py` classifies personal data indicators, masks previews, and supports safer persistence defaults.
 - Domain analytics layer: `src/analysis/exploratory.py` generates descriptive statistics and automated insights.
 - Data curation layer: `src/data/transformer.py` standardizes column names, infers types, handles missing values, and removes duplicates.
-- Persistence layer: `src/data/sqlite_manager.py` stores curated outputs in SQLite for downstream inspection and reuse.
-- Platform/config layer: `config/settings.py`, `config/dashboard_policy.json`, `.streamlit/`, and validation scripts define runtime paths, scoring policies, deployment expectations, and governance checks.
+- Persistence layer: `src/data/sqlite_manager.py` stores curated outputs in SQLite for inspection and reuse.
+- Platform/config layer: `config/settings.py`, `config/dashboard_policy.json`, `.streamlit/`, and validation scripts define runtime paths, scoring policies, and operational checks.
 
 ## End-to-End Flow
 ```mermaid
@@ -57,7 +57,7 @@ sequenceDiagram
 ```
 
 ## Dashboard Operating Model
-- `Overview`: KPI, decision brief, confidence level, release posture, commercial concentration, and trend view.
+- `Overview`: KPI, decision brief, confidence level, release recommendation, commercial concentration, and trend view.
 - `Upload`: raw-to-curated transition with immediate quality feedback.
 - `Data`: raw vs. curated inspection, column profile, and transformation log.
 - `EDA`: automated insights, descriptive statistics, missing profile, and strongest correlations.

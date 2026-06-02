@@ -1,9 +1,9 @@
 ﻿# Contributing Guide
 
-This repository follows a senior-level engineering workflow focused on traceability, quality, and reproducibility.
+This repository follows a practical engineering workflow focused on traceability, quality, and reproducibility.
 
 ## Branch Strategy
-- `main`: protected, production-ready branch.
+- `main`: protected branch for stable releases.
 - Feature branches: `feat/<short-topic>`, `fix/<short-topic>`, `chore/<short-topic>`.
 
 Examples:

@@ -305,7 +305,7 @@ def build_decision_brief(
     priority_actions: list[str] | None = None,
     analysis: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Translate analytical signals into an executive-style decision memo."""
+    """Translate analytical signals into a business-oriented decision memo."""
     if not quality_summary:
         return {
             "headline": "No active dataset",

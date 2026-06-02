@@ -28,6 +28,10 @@
 - Synthetic example files are for local demonstration only.
 - Any business-facing report must cite the dataset source and license.
 
+## Portfolio Scope
+- This provenance document supports traceability in a portfolio project.
+- It demonstrates good data documentation practices and source transparency.
+
 ## Reproducibility Evidence
 - Source configuration: [config/data_source.yaml](../config/data_source.yaml)
 - Provenance validation script: [scripts/validate_data_provenance.py](../scripts/validate_data_provenance.py)

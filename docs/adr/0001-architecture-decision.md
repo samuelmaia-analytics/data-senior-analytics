@@ -4,7 +4,7 @@
 - Date: 2026-03-04
 
 ## Context
-The project must support recruiter visibility and production-grade maintainability while keeping local execution lightweight.
+The project must support recruiter visibility and practical maintainability while keeping local execution lightweight.
 
 ## Decision
 Adopt a layered architecture:
