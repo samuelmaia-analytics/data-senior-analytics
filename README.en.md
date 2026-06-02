@@ -1,4 +1,4 @@
-# Data Senior Analytics
+# Data Analytics Workflow
 
 [Versão em Português](README.md)
 
@@ -7,53 +7,60 @@
 [![Streamlit](https://img.shields.io/badge/Streamlit-Live_App-FF4B4B?logo=streamlit&logoColor=white)](https://data-analytics-sr.streamlit.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-0f172a.svg)](LICENSE)
 
-Analytics project that turns tabular files into a curated, traceable, decision-ready workflow with a Streamlit dashboard, SQLite persistence, explicit trust signals, and deployment governance.
+Analytics project that turns tabular files into a curated, traceable, decision-ready workflow with a Streamlit dashboard, SQLite persistence, quality indicators, and technical documentation.
 
 Live demo: https://data-analytics-sr.streamlit.app
 
-## Project Thesis
-The real problem is not just data visualization. The real problem is converting heterogeneous tabular files into a trustworthy decision workflow, with explicit quality signals, transformation traceability, and reproducible operations.
+## Project goal
 
-This repository solves that through a layered approach:
-- raw intake via CSV/XLSX or demo datasets
-- automated curation with standardization, dtype inference, null handling, and deduplication
-- versioned scoring and action policy in `config/dashboard_policy.json`
-- business-facing consumption through KPI, quality readiness, trends, and priority actions
-- persistence of curated datasets into SQLite
-- engineering discipline with lint, tests, coverage, deploy preflight, and operational documentation
+This project demonstrates practical foundations in data analysis, BI, and analytics engineering: receiving raw data, applying treatment, validating quality, generating indicators, and delivering a clear business-oriented view.
 
-## Use Case
-The dashboard is designed for scenarios where leadership needs fast answers to practical questions:
-- is the dataset reliable enough to share or persist?
-- where is commercial concentration highest?
-- are there signs of weakening momentum or decision risk?
-- what should be done next before moving forward?
+This repository uses a layered approach:
+- raw intake via CSV/XLSX or demo datasets;
+- automated curation with standardization, dtype inference, null handling, and deduplication;
+- versioned scoring and action policy in `config/dashboard_policy.json`;
+- business-facing consumption through KPIs, data quality, trends, and priority actions;
+- persistence of curated datasets into SQLite;
+- good practices with lint, tests, coverage, deploy preflight, and traceability.
 
-## Maturity Signals
-- It translates technical data risk into business language: `Quality Score`, `Completeness`, `Priority actions`.
-- It treats Streamlit as a product and operations surface, not as a notebook with widgets.
-- It separates concerns across `dashboard/`, `src/analysis/`, `src/data/`, and `config/`.
-- It extracts curation into a reusable service in `src/app/curation_service.py`.
-- It keeps Streamlit Cloud deployment reproducible with a runbook and troubleshooting guidance.
-- It protects behavior with automated tests and CI gates.
+## Use case
+
+The dashboard is designed for scenarios where a team needs fast answers:
+- is the dataset reliable enough for analysis?
+- which indicators need attention?
+- are there missing, duplicated, or inconsistent records?
+- what should be done before sharing or persisting the dataset?
+
+## Skills demonstrated
+
+- Data treatment and validation with Python/Pandas.
+- Analytical dashboard development with Streamlit.
+- Code organization into reusable layers.
+- Indicators, quality scoring, and business-oriented interpretation.
+- Local persistence with SQLite.
+- Technical documentation, automated tests, and CI/CD.
+- Governance, traceability, and basic privacy-aware data handling.
 
 ## What the dashboard delivers
-- `Overview`: decision memo with KPI, current risk, confidence, release posture, commercial concentration, and revenue trend.
-- `Upload`: ingestion with automated curation and immediate quality scoring.
+
+- `Overview`: dataset summary, indicators, quality, risk, and next steps.
+- `Upload`: CSV/XLSX ingestion with automated curation and immediate quality scoring.
 - `Data`: raw vs curated comparison, with masked previews when personal data is detected.
-- `EDA`: automated insights, statistics, correlation, and missing profile.
-- `Visualizations`: distribution, business mix, and trend analysis with less default reporting.
+- `EDA`: statistics, correlation, automated insights, and missing-value profile.
+- `Visualizations`: distribution, business mix, and trend analysis.
 - `Database`: operational verification of the curated dataset persisted in SQLite.
-- `Settings`: runtime metadata, governance metadata, quality metadata, and transformation count.
+- `Settings`: runtime, quality, governance, and transformation metadata.
 
 ## End-to-end flow
+
 1. The user uploads CSV/XLSX or loads a demo dataset.
 2. The app applies `DataTransformer` to build a curated version.
 3. `ExploratoryAnalyzer` produces statistics and automated insights.
 4. `dashboard/utils/analytics.py` converts profiling into briefing, governance, concentration, and a decision-oriented narrative.
 5. The user can persist the curated dataset into SQLite.
 
-## Architecture Decisions
+## Architecture
+
 ```mermaid
 flowchart LR
     A[CSV / XLSX / Demo data] --> B[Streamlit Upload]
@@ -74,18 +81,21 @@ Related documentation:
 - [docs/DATA_PROVENANCE.md](docs/DATA_PROVENANCE.md)
 
 ## Screenshots / Demo
+
 ![Dashboard Preview](assets/images/dashboard-preview.png)
 ![Dashboard Insight View](assets/images/Screenshot_2.png)
 ![Dashboard Walkthrough](assets/images/dashboard-walkthrough.gif)
 
 ## Stack
-- `streamlit` for the decision-oriented product experience
+
+- `streamlit` for dashboard and user experience
 - `pandas` and `numpy` for transformation and profiling
 - `plotly` for analytical visualization
 - `sqlite3` via `SQLiteManager` for persistence
-- `ruff`, `black`, `pytest`, and `pytest-cov` for engineering discipline
+- `ruff`, `black`, `pytest`, and `pytest-cov` for code quality
 
 ## Local run
+
 ```bash
 git clone https://github.com/samuelmaia-analytics/data-senior-analytics.git
 cd data-senior-analytics
@@ -102,6 +112,7 @@ python -m streamlit run dashboard/app.py
 ```
 
 ## Quality and operations
+
 - CI with lint, format, tests, and coverage.
 - Coverage gate at `>=70%`.
 - Streamlit Cloud preflight checks.
@@ -113,6 +124,7 @@ python -m streamlit run dashboard/app.py
 - Dashboard smoke tests as part of product-surface validation.
 
 ## Repository structure
+
 - `dashboard/`: Streamlit interface and user experience composition
 - `src/app/`: application services and curated workflow orchestration
 - `src/analysis/`: automated exploratory analysis
@@ -122,15 +134,10 @@ python -m streamlit run dashboard/app.py
 - `docs/LGPD_GOVERNANCE.md`: practical privacy interpretation applied to the analytics workflow
 - `tests/`: automated behavior protection
 
+## For recruiters and leads
+
+This project demonstrates readiness to contribute to data analysis, BI, analytical automation, and business-support initiatives. It is suitable for conversations about Data Analyst, BI Analyst, early/intermediate Analytics Engineer, or freelance data organization and visualization projects.
+
 ## License
+
 Licensed under MIT. See [LICENSE](LICENSE).
-
-## License
-
-This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
-
-To view a copy of this license, visit:
-https://creativecommons.org/licenses/by-nc/4.0/
-
-[![License: CC BY-NC 4.0](https://licensebuttons.net/l/by-nc/4.0/88x31.png)](https://creativecommons.org/licenses/by-nc/4.0/)
-
